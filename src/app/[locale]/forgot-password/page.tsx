@@ -1,19 +1,17 @@
 import { Metadata } from "next";
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
-import LoginForm from "@/components/auth/login-form";
+import ForgotPasswordForm from "@/components/auth/forgot-password-form";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const resolved: Locale = normalizeLocale(locale);
   const { t } = getCopy(resolved);
   return {
-    title: t("Sign in", "Iniciar sesión"),
+    title: t("Forgot password", "Olvidé mi contraseña"),
   };
 }
 
-export default async function LoginPage({
+export default async function ForgotPasswordPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -22,22 +20,9 @@ export default async function LoginPage({
   const locale: Locale = normalizeLocale(raw);
   const { t } = getCopy(locale);
 
-  async function handleSignIn(formData: FormData) {
+  async function handleReset(_formData: FormData) {
     "use server";
-    const email = String(formData.get("email") ?? "").trim().toLowerCase();
-    const password = String(formData.get("password") ?? "");
-    if (!email || !password) {
-      return;
-    }
-    const store = await cookies();
-    store.set("qrcasas_session", email, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      path: "/",
-      maxAge: 60 * 60 * 24 * 30,
-    });
-    redirect(`/${locale}/account`);
+    // Placeholder: wire to email provider in production.
   }
 
   return (
@@ -48,17 +33,17 @@ export default async function LoginPage({
             Q
           </span>
           <h1 className="text-2xl font-bold tracking-tight">
-            {t("Sign in to QRcasas", "Inicia sesión en QRcasas")}
+            {t("Reset your password", "Restablece tu contraseña")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {t(
-              "Access your favorites, watchlists and property management.",
-              "Accede a tus favoritos, listas de seguimiento y gestión de propiedades."
+              "Enter your email and we'll send you a link to reset your password.",
+              "Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña."
             )}
           </p>
         </div>
 
-        <LoginForm locale={locale} onSignIn={handleSignIn} t={t} />
+        <ForgotPasswordForm locale={locale} onReset={handleReset} t={t} />
       </div>
     </main>
   );

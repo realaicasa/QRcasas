@@ -2,27 +2,45 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, User, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
 
-interface LoginFormProps {
+interface RegisterFormProps {
   locale: string;
-  onSignIn: (formData: FormData) => Promise<void>;
+  onRegister: (formData: FormData) => Promise<void>;
   t: (en: string, es: string) => string;
 }
 
-export default function LoginForm({ locale, onSignIn, t }: LoginFormProps) {
+export default function RegisterForm({ locale, onRegister, t }: RegisterFormProps) {
   const [pending, setPending] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   return (
     <form
       action={async (fd) => {
         setPending(true);
-        await onSignIn(fd);
+        await onRegister(fd);
         setPending(false);
       }}
       className="space-y-4"
     >
+      <div>
+        <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground">
+          {t("Full name", "Nombre completo")}
+        </label>
+        <div className="relative">
+          <User className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            id="name"
+            name="name"
+            type="text"
+            required
+            placeholder={t("John Smith", "Juan Pérez")}
+            className="w-full rounded-lg border border-input bg-background py-2.5 pl-10 pr-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+        </div>
+      </div>
+
       <div>
         <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground">
           {t("Email address", "Correo electrónico")}
@@ -51,6 +69,7 @@ export default function LoginForm({ locale, onSignIn, t }: LoginFormProps) {
             name="password"
             type={showPassword ? "text" : "password"}
             required
+            minLength={8}
             placeholder="••••••••"
             className="w-full rounded-lg border border-input bg-background py-2.5 pl-10 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
@@ -65,17 +84,30 @@ export default function LoginForm({ locale, onSignIn, t }: LoginFormProps) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <label className="flex items-center gap-2 text-sm text-muted-foreground">
-          <input type="checkbox" name="remember" className="size-3.5 rounded border-border text-primary" />
-          {t("Remember me", "Recordarme")}
+      <div>
+        <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-foreground">
+          {t("Confirm password", "Confirmar contraseña")}
         </label>
-        <Link
-          href={`/${locale}/forgot-password`}
-          className="text-sm font-medium text-primary hover:underline"
-        >
-          {t("Forgot password?", "¿Olvidaste tu contraseña?")}
-        </Link>
+        <div className="relative">
+          <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+          <input
+            id="confirmPassword"
+            name="confirmPassword"
+            type={showConfirm ? "text" : "password"}
+            required
+            minLength={8}
+            placeholder="••••••••"
+            className="w-full rounded-lg border border-input bg-background py-2.5 pl-10 pr-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+          />
+          <button
+            type="button"
+            onClick={() => setShowConfirm(!showConfirm)}
+            aria-label="Toggle password visibility"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          >
+            {showConfirm ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+          </button>
+        </div>
       </div>
 
       <button
@@ -86,20 +118,20 @@ export default function LoginForm({ locale, onSignIn, t }: LoginFormProps) {
         {pending ? (
           <>
             <Loader2 className="size-4 animate-spin" />
-            {t("Signing in…", "Iniciando sesión…")}
+            {t("Creating account…", "Creando cuenta…")}
           </>
         ) : (
           <>
-            {t("Sign in", "Iniciar sesión")}
+            {t("Create account", "Crear cuenta")}
             <ArrowRight className="size-4" />
           </>
         )}
       </button>
 
       <p className="pt-2 text-center text-sm text-muted-foreground">
-        {t("Don't have an account?", "¿No tienes una cuenta?")}{" "}
-        <Link href={`/${locale}/register`} className="font-medium text-primary hover:underline">
-          {t("Create one", "Crea una")}
+        {t("Already have an account?", "¿Ya tienes una cuenta?")}{" "}
+        <Link href={`/${locale}/login`} className="font-medium text-primary hover:underline">
+          {t("Sign in", "Iniciar sesión")}
         </Link>
       </p>
     </form>

@@ -72,6 +72,29 @@ export async function getUserById(userId: string): Promise<UserProfile | null> {
   return rows.length > 0 ? parseUserProfile(rows[0]) : null;
 }
 
+export interface CreateUserInput {
+  email: string;
+  preferredLanguage?: "en" | "es";
+  isVerified?: boolean;
+}
+
+export async function createUser(input: CreateUserInput): Promise<UserRecord> {
+  const client = new TeableClient(getTeableConfig());
+  const record = await client.createRecord(TABLES.Users, {
+    Email: input.email,
+    Preferred_Language: input.preferredLanguage ?? "en",
+    Is_Verified: input.isVerified ?? false,
+  });
+  return {
+    userId: record.id,
+    email: input.email,
+    preferredLanguage: input.preferredLanguage ?? "en",
+    isVerified: input.isVerified ?? false,
+    createdAt: "",
+    updatedAt: "",
+  };
+}
+
 export async function getUserByEmail(email: string): Promise<UserRecord | null> {
   const client = new TeableClient(getTeableConfig());
   const sql =

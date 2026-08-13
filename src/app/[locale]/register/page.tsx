@@ -2,18 +2,19 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
-import LoginForm from "@/components/auth/login-form";
+import { createUser } from "@/lib/data/users";
+import RegisterForm from "@/components/auth/register-form";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const resolved: Locale = normalizeLocale(locale);
   const { t } = getCopy(resolved);
   return {
-    title: t("Sign in", "Iniciar sesión"),
+    title: t("Create account", "Crear cuenta"),
   };
 }
 
-export default async function LoginPage({
+export default async function RegisterPage({
   params,
 }: {
   params: Promise<{ locale: string }>;
@@ -22,13 +23,22 @@ export default async function LoginPage({
   const locale: Locale = normalizeLocale(raw);
   const { t } = getCopy(locale);
 
-  async function handleSignIn(formData: FormData) {
+  async function handleRegister(formData: FormData) {
     "use server";
     const email = String(formData.get("email") ?? "").trim().toLowerCase();
     const password = String(formData.get("password") ?? "");
-    if (!email || !password) {
+    const confirm = String(formData.get("confirmPassword") ?? "");
+
+    if (!email || password.length < 8 || password !== confirm) {
       return;
     }
+
+    await createUser({
+      email,
+      preferredLanguage: locale,
+      isVerified: true,
+    });
+
     const store = await cookies();
     store.set("qrcasas_session", email, {
       httpOnly: true,
@@ -48,17 +58,17 @@ export default async function LoginPage({
             Q
           </span>
           <h1 className="text-2xl font-bold tracking-tight">
-            {t("Sign in to QRcasas", "Inicia sesión en QRcasas")}
+            {t("Create your QRcasas account", "Crea tu cuenta de QRcasas")}
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             {t(
-              "Access your favorites, watchlists and property management.",
-              "Accede a tus favoritos, listas de seguimiento y gestión de propiedades."
+              "Sign up to save favorites, create watchlists, and manage properties.",
+              "Regístrate para guardar favoritos, crear listas de seguimiento y gestionar propiedades."
             )}
           </p>
         </div>
 
-        <LoginForm locale={locale} onSignIn={handleSignIn} t={t} />
+        <RegisterForm locale={locale} onRegister={handleRegister} t={t} />
       </div>
     </main>
   );
