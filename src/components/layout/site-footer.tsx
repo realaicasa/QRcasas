@@ -10,6 +10,10 @@ const COPY = {
   tagline: { en: "Property marketplace for Quintana Roo", es: "Mercado inmobiliario de Quintana Roo" },
   realtors: { en: "Realtors", es: "Agentes" },
   properties: { en: "Properties", es: "Propiedades" },
+  terms: { en: "Terms", es: "Términos" },
+  privacy: { en: "Privacy", es: "Privacidad" },
+  acceptableUse: { en: "Acceptable Use", es: "Uso Aceptable" },
+  advertiserAgreement: { en: "Advertiser Agreement", es: "Acuerdo de Anunciantes" },
   notice: {
     en: "QRcasas is a listing marketplace. We do not independently guarantee property ownership or an advertiser's authority, and we do not hold funds. Independently verify the advertiser, property, contract and payment instructions before transferring money.",
     es: "QRcasas es un marketplace de anuncios. No garantizamos de forma independiente la propiedad ni la autoridad del anunciante, y no retenemos fondos. Verifique de forma independiente al anunciante, la propiedad, el contrato y las instrucciones de pago antes de transferir dinero.",
@@ -61,10 +65,20 @@ export default function SiteFooter({ locale }: SiteFooterProps) {
           <p>
             © {new Date().getFullYear()} QRcasas. {t("rights")}
           </p>
-          <p className="flex items-center gap-1.5">
-            <ShieldCheck className="size-3.5" />
-            {t("ad")}
-          </p>
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
+            <Link href={`/${locale}/terms`} className="transition-colors hover:text-primary">
+              {t("terms")}
+            </Link>
+            <Link href={`/${locale}/privacy`} className="transition-colors hover:text-primary">
+              {t("privacy")}
+            </Link>
+            <Link href={`/${locale}/acceptable-use`} className="transition-colors hover:text-primary">
+              {t("acceptableUse")}
+            </Link>
+            <Link href={`/${locale}/advertiser-agreement`} className="transition-colors hover:text-primary">
+              {t("advertiserAgreement")}
+            </Link>
+          </div>
         </div>
       </div>
     </footer>

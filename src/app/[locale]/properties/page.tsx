@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { getPublicProperties, type PropertyListFilters, type PropertySortOption } from "@/lib/data/property";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 import PropertyCard from "@/components/properties/property-card";
+import FilterBar from "@/components/properties/filter-bar";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }): Promise<Metadata> {
   const params = await searchParams;
@@ -83,102 +84,38 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
         </div>
       </section>
 
+      {/* Filter Bar */}
+      <FilterBar total={total} locale={locale} />
+
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
-        {/* Filters */}
-        <form className="mb-10 grid gap-3 rounded-xl border border-border bg-card p-4 shadow-sm sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground">
-              {t("Type", "Tipo")}
-            </label>
-            <select
-              name="listingType"
-              defaultValue={filters.listingType ?? ""}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
+        {/* Sponsors */}
+        <div className="mb-8 rounded-xl border border-border bg-card p-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold text-muted-foreground">
+              {t("Sponsors", "Patrocinadores")}
+            </h3>
+            <a
+              href={`/${locale}/advertise`}
+              className="text-xs text-primary hover:underline"
             >
-              <option value="">{t("All", "Todas")}</option>
-              <option value="Sale">{t("For Sale", "En Venta")}</option>
-              <option value="Rental">{t("For Rent", "En Renta")}</option>
-            </select>
+              {t("Advertise with us", "Anúnciate con nosotros")}
+            </a>
           </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground">
-              {t("Min Price", "Precio Mín")}
-            </label>
-            <input
-              type="number"
-              name="minPrice"
-              defaultValue={filters.minPrice ?? ""}
-              placeholder="0"
-              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
+          <div className="mt-3 text-center text-sm text-muted-foreground">
+            {t("No sponsors yet", "Aún no hay patrocinadores")}
           </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground">
-              {t("Max Price", "Precio Máx")}
-            </label>
-            <input
-              type="number"
-              name="maxPrice"
-              defaultValue={filters.maxPrice ?? ""}
-              placeholder={t("Any", "Cualquiera")}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground">
-              {t("Bedrooms", "Dormitorios")}
-            </label>
-            <select
-              name="bedrooms"
-              defaultValue={filters.bedrooms ?? ""}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            >
-              <option value="">{t("Any", "Cualquiera")}</option>
-              <option value="1">1+</option>
-              <option value="2">2+</option>
-              <option value="3">3+</option>
-              <option value="4">4+</option>
-            </select>
-          </div>
-
-          <div className="flex flex-col gap-1">
-            <label className="text-xs font-semibold text-muted-foreground">
-              {t("Sort", "Ordenar")}
-            </label>
-            <select
-              name="sort"
-              defaultValue={sort}
-              className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            >
-              <option value="newest">{t("Newest", "Más reciente")}</option>
-              <option value="price_asc">{t("Price: Low to High", "Precio: Menor a Mayor")}</option>
-              <option value="price_desc">{t("Price: High to Low", "Precio: Mayor a Menor")}</option>
-            </select>
-          </div>
-
-          <div className="flex items-end md:col-span-3 lg:col-span-5">
-            <button
-              type="submit"
-              className="inline-flex w-full items-center justify-center rounded-lg bg-primary px-6 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark sm:w-auto"
-            >
-              {t("Search", "Buscar")}
-            </button>
-          </div>
-        </form>
+        </div>
 
         {/* Property grid */}
         {properties.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/60 py-20 text-center">
             <p className="text-lg font-semibold mb-2">
-              {t("No properties found", "No se encontraron propiedades")}
+              {t("No published properties match these filters.", "No hay propiedades publicadas que coincidan con estos filtros.")}
             </p>
             <p className="text-sm text-muted-foreground">
               {t(
-                "Try adjusting your filters or check back later for new listings.",
-                "Intenta ajustar tus filtros o vuelve más tarde para nuevas propiedades."
+                "Clear one or more filters to broaden the search.",
+                "Limpia uno o más filtros para ampliar la búsqueda."
               )}
             </p>
           </div>
@@ -230,6 +167,32 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
             )}
           </nav>
         )}
+
+        {/* Latest market updates */}
+        <div className="mt-10 rounded-xl border border-border bg-card p-6">
+          <h3 className="text-lg font-semibold mb-4">
+            {t("Latest market updates", "Últimas actualizaciones del mercado")}
+          </h3>
+          <div className="text-center py-8 text-sm text-muted-foreground">
+            {t(
+              "No sourced updates yet. The administrator can add the first bilingual market update.",
+              "Aún no hay actualizaciones. El administrador puede agregar la primera actualización bilingüe del mercado."
+            )}
+          </div>
+        </div>
+
+        {/* Marketplace notice */}
+        <div className="mt-8 rounded-xl border border-border bg-card/60 p-6">
+          <h3 className="text-sm font-semibold mb-3">
+            {t("Marketplace notice", "Aviso del mercado")}
+          </h3>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            {t(
+              "QRcasas is a listing marketplace. We do not independently guarantee property ownership or an advertiser's authority, and we do not hold funds. Independently verify the advertiser, property, contract and payment instructions before transferring money.",
+              "QRcasas es un marketplace de anuncios. No garantizamos de forma independiente la propiedad ni la autoridad del anunciante, y no retenemos fondos. Verifique de forma independiente al anunciante, la propiedad, el contrato y las instrucciones de pago antes de transferir dinero."
+            )}
+          </p>
+        </div>
       </div>
     </main>
   );

@@ -1,0 +1,12 @@
+{
+  "name": "qrcasas",
+  "short_name": "QRcasas",
+  "start_url": "https://qrcasas.vercel.app",
+  "display_name": "QRcasas - Quintana Roo Real Estate Marketplace",
+  "theme_color": "#0077b6",
+  "icons": {
+    "apple-touch-icon": "https://imgur.com/placeholder.png",
+    "fabric-icon-name": "house",
+    "fabric-icon-color": "primary"
+  }
+}
