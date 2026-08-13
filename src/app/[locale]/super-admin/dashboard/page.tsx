@@ -1,5 +1,21 @@
-import { Report } from "@/lib/data/properties";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
+
+export interface ReportReason {
+  id: string;
+  en: string;
+  es: string;
+}
+
+export interface Report {
+  id: string;
+  userId: string;
+  propertyId?: string;
+  agentId?: string;
+  reason: ReportReason;
+  submittedAt: string;
+  status: "pending" | "approved" | "rejected";
+  notes?: string;
+}
 
 type AdminRole = "super_admin" | "moderator" | "member";
 
