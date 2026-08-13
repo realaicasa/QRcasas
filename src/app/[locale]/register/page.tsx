@@ -68,7 +68,7 @@ export default async function RegisterPage({
           </p>
         </div>
 
-        <RegisterForm locale={locale} onRegister={handleRegister} t={t} />
+        <RegisterForm locale={locale} onRegister={handleRegister} />
       </div>
     </main>
   );

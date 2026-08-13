@@ -7,11 +7,11 @@ import { Mail, Lock, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
 interface LoginFormProps {
   locale: string;
   onSignIn: (formData: FormData) => Promise<void>;
-  t: (en: string, es: string) => string;
 }
 
-export default function LoginForm({ locale, onSignIn, t }: LoginFormProps) {
+export default function LoginForm({ locale, onSignIn }: LoginFormProps) {
   const [pending, setPending] = useState(false);
+  const t = (en: string, es: string) => (locale === "es" ? es : en);
   const [showPassword, setShowPassword] = useState(false);
 
   return (

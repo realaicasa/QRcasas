@@ -58,7 +58,7 @@ export default async function LoginPage({
           </p>
         </div>
 
-        <LoginForm locale={locale} onSignIn={handleSignIn} t={t} />
+        <LoginForm locale={locale} onSignIn={handleSignIn} />
       </div>
     </main>
   );

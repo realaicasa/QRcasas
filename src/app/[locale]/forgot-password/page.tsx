@@ -43,7 +43,7 @@ export default async function ForgotPasswordPage({
           </p>
         </div>
 
-        <ForgotPasswordForm locale={locale} onReset={handleReset} t={t} />
+        <ForgotPasswordForm locale={locale} onReset={handleReset} />
       </div>
     </main>
   );

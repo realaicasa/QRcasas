@@ -7,12 +7,12 @@ import { Mail, ArrowRight, Loader2, CheckCircle2 } from "lucide-react";
 interface ForgotPasswordFormProps {
   locale: string;
   onReset: (formData: FormData) => Promise<void>;
-  t: (en: string, es: string) => string;
 }
 
-export default function ForgotPasswordForm({ locale, onReset, t }: ForgotPasswordFormProps) {
+export default function ForgotPasswordForm({ locale, onReset }: ForgotPasswordFormProps) {
   const [pending, setPending] = useState(false);
   const [sent, setSent] = useState(false);
+  const t = (en: string, es: string) => (locale === "es" ? es : en);
 
   return (
     <form

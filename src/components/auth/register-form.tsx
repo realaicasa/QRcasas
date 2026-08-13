@@ -7,11 +7,11 @@ import { Mail, Lock, User, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react
 interface RegisterFormProps {
   locale: string;
   onRegister: (formData: FormData) => Promise<void>;
-  t: (en: string, es: string) => string;
 }
 
-export default function RegisterForm({ locale, onRegister, t }: RegisterFormProps) {
+export default function RegisterForm({ locale, onRegister }: RegisterFormProps) {
   const [pending, setPending] = useState(false);
+  const t = (en: string, es: string) => (locale === "es" ? es : en);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
 
