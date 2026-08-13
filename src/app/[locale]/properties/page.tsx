@@ -1,8 +1,11 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { getPublicProperties, type PropertyListFilters, type PropertySortOption } from "@/lib/data/property";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 import PropertyCard from "@/components/properties/property-card";
 import FilterBar from "@/components/properties/filter-bar";
+import MapView from "@/components/properties/map-view";
+import { Tag } from "lucide-react";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }): Promise<Metadata> {
   const params = await searchParams;
@@ -28,7 +31,6 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   const locale: Locale = normalizeLocale(raw);
   const { t } = getCopy(locale);
 
-  // Parse filters from search params
   const filters: PropertyListFilters = {};
   if (sp.listingType === "Sale" || sp.listingType === "Rental") {
     filters.listingType = sp.listingType;
@@ -60,26 +62,37 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
     <main>
       {/* Hero */}
       <section className="bg-hero border-b border-border/60">
-        <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 sm:py-16">
           <div className="max-w-3xl">
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-primary">
               {t("Quintana Roo, Mexico", "Quintana Roo, México")}
             </p>
             <h1 className="font-display text-4xl font-semibold leading-tight text-foreground sm:text-5xl">
-              {t("Find your home in Paradise", "Encuentra tu hogar en el Paraíso")}
+              {t("Properties in Quintana Roo", "Propiedades en Quintana Roo")}
             </h1>
             <p className="mt-4 text-base text-muted-foreground sm:text-lg">
               {t(
-                "Verified properties across Riviera Maya: Tulum, Cancún, Playa del Carmen and beyond.",
-                "Propiedades verificadas en la Riviera Maya: Tulum, Cancún, Playa del Carmen y más."
+                "Cities, areas and verified developments",
+                "Ciudades, zonas y desarrollos verificados"
               )}
             </p>
-            <p className="mt-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-              {t(
-                `${total} verified listings in Quintana Roo`,
-                `${total} propiedades verificadas en Quintana Roo`
-              )}
-            </p>
+
+            {/* CTAs */}
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Link
+                href={`/${locale}/account/properties/new`}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
+              >
+                <Tag className="size-4" />
+                {t("Add property", "Publicar propiedad")}
+              </Link>
+              <Link
+                href={`/${locale}/directory/register`}
+                className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
+              >
+                {t("Become a realtor", "Hazte agente inmobiliario")}
+              </Link>
+            </div>
           </div>
         </div>
       </section>
@@ -88,29 +101,22 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
       <FilterBar total={total} locale={locale} />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
-        {/* Sponsors */}
-        <div className="mb-8 rounded-xl border border-border bg-card p-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold text-muted-foreground">
-              {t("Sponsors", "Patrocinadores")}
-            </h3>
-            <a
-              href={`/${locale}/advertise`}
-              className="text-xs text-primary hover:underline"
-            >
-              {t("Advertise with us", "Anúnciate con nosotros")}
-            </a>
-          </div>
-          <div className="mt-3 text-center text-sm text-muted-foreground">
-            {t("No sponsors yet", "Aún no hay patrocinadores")}
-          </div>
+        {/* Results map */}
+        <div className="mb-8">
+          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+            {t("Results map", "Mapa de resultados")}
+          </h2>
+          <MapView properties={properties} locale={locale} />
         </div>
 
         {/* Property grid */}
         {properties.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/60 py-20 text-center">
             <p className="text-lg font-semibold mb-2">
-              {t("No published properties match these filters.", "No hay propiedades publicadas que coincidan con estos filtros.")}
+              {t(
+                "No published properties match these filters.",
+                "No hay propiedades publicadas que coincidan con estos filtros."
+              )}
             </p>
             <p className="text-sm text-muted-foreground">
               {t(

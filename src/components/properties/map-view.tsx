@@ -19,60 +19,44 @@ export default function MapView({ properties, locale }: MapViewProps) {
   const t = (en: string, es: string) => (locale === "es" ? es : en);
 
   const mapped = useMemo(
-    () =>
-      properties.filter(
-        (p) => p.latitude != null && p.longitude != null
-      ),
+    () => properties.filter((p) => p.latitude != null && p.longitude != null),
     [properties]
   );
 
-  // Center on Quintana Roo by default, or the first mapped property
+  // Default center: Riviera Maya / Quintana Roo
   const center = useMemo(() => {
-    const first = mapped[0];
-    return first && first.latitude != null && first.longitude != null
-      ? [first.longitude, first.latitude]
-      : [-86.8515, 20.6843];
+    const lats = mapped.map((p) => p.latitude as number);
+    const lngs = mapped.map((p) => p.longitude as number);
+    if (lats.length > 0 && lngs.length > 0) {
+      const meanLat = lats.reduce((a, b) => a + b, 0) / lats.length;
+      const meanLng = lngs.reduce((a, b) => a + b, 0) / lngs.length;
+      return { lat: meanLat, lng: meanLng };
+    }
+    return { lat: 20.6843, lng: -86.8515 };
   }, [mapped]);
 
-  const markers = useMemo(
-    () =>
-      mapped
-        .filter((p) => p.latitude != null && p.longitude != null)
-        .map(
-          (p) => `${p.longitude},${p.latitude},${encodeURIComponent(p.title)}`
-        )
-        .join("|"),
-    [mapped]
-  );
-
-  const embedUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${center[0] - 1.5}%2C${center[1] - 1.0}%2C${center[0] + 1.5}%2C${center[1] + 1.0}&layer=mapnik&marker=${center[1]}%2C${center[0]}`;
-
-  console.log("OSM embed URL:", embedUrl);
-
-  if (mapped.length === 0) {
-    return (
-      <div className="relative w-full rounded-xl border border-border overflow-hidden bg-muted">
-        <div className="flex h-[400px] w-full items-center justify-center">
-          <p className="text-sm text-muted-foreground">
-            {t("The map is temporarily unavailable.", "El mapa no está disponible temporalmente.")}
-          </p>
-        </div>
-      </div>
-    );
-  }
+  const embedUrl = useMemo(() => {
+    const pad = 1.5;
+    const bbox = `${center.lng - pad}%2C${center.lat - pad}%2C${center.lng + pad}%2C${center.lat + pad}`;
+    const marker = mapped.length > 0 ? `&marker=${center.lat}%2C${center.lng}` : "";
+    return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik${marker}`;
+  }, [center, mapped.length]);
 
   return (
-    <div className="relative w-full rounded-xl border border-border overflow-hidden bg-muted">
+    <div className="relative w-full overflow-hidden rounded-xl border border-border bg-muted">
       <iframe
         title="Property map"
         src={embedUrl}
-        className="h-[400px] w-full"
+        className="h-[420px] w-full"
         style={{ border: 0 }}
         loading="lazy"
       />
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/80 to-transparent p-4">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-background/90 to-transparent p-3">
         <p className="text-xs text-muted-foreground">
-          © OpenStreetMap contributors · {mapped.length} {t("properties mapped", "propiedades mapeadas")}
+          © OpenStreetMap contributors · {mapped.length}{" "}
+          {mapped.length === 1
+            ? t("mapped property", "propiedad mapeada")
+            : t("mapped properties", "propiedades mapeadas")}
         </p>
       </div>
     </div>

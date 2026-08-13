@@ -246,6 +246,8 @@ export interface PropertyListItem {
   areaUnit: string | null;
   photos: { url?: string; signedUrl?: string }[];
   publicLocation: string | null;
+  latitude: number | null;
+  longitude: number | null;
   featured: boolean;
   updatedAt: string;
 }
@@ -308,7 +310,8 @@ export async function getPublicProperties(
       qi("__id"), qi("Public_Slug"), qi("Title"), qi("Price"), qi("Currency"),
       qi("Listing_Type"), qi("Bedrooms"), qi("Bathrooms"),
       qi("Interior_Area"), qi("Area_Unit"), qi("Photos"),
-      qi("Public_Location"), qi("Featured"), qi("Updated"),
+      qi("Public_Location"), qi("Latitude"), qi("Longitude"),
+      qi("Featured"), qi("Updated"),
     ].join(", ") +
     " FROM " + qiTable(DB_TABLES.Properties) +
     " WHERE " + where +
@@ -341,6 +344,8 @@ export async function getPublicProperties(
       areaUnit: row.Area_Unit != null ? String(row.Area_Unit) : null,
       photos,
       publicLocation: row.Public_Location != null ? String(row.Public_Location) : null,
+      latitude: row.Latitude != null ? Number(row.Latitude) : null,
+      longitude: row.Longitude != null ? Number(row.Longitude) : null,
       featured: row.Featured === true,
       updatedAt: row.Updated != null ? String(row.Updated) : "",
     };
