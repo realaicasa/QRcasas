@@ -65,7 +65,7 @@ export default function SiteHeader({ locale }: SiteHeaderProps) {
           <span className="hidden h-5 w-px bg-border sm:block" />
           <Link
             href={`/${locale}/account/properties/new`}
-            className="hidden rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted sm:inline-flex"
+            className="hidden rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted md:inline-flex"
           >
             {t("getStarted")}
           </Link>
