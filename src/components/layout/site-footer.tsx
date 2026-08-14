@@ -172,33 +172,33 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
   return (
     <>
       <footer className="border-t border-border bg-sand/50">
-        {/* CTA Buttons */}
+        {/* CTA Buttons - Full width, prominent */}
         <div className="border-b border-border/60 bg-hero">
-          <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
+          <div className="mx-auto w-full px-4 py-16 sm:px-6">
+            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
               {isLoggedIn ? (
                 <Link
                   href={`/${locale}/account/properties/new`}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
+                  className="flex-1 flex items-center justify-center gap-3 rounded-lg bg-primary px-6 py-5 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark w-full sm:w-auto"
                 >
                   <Tag className="size-5" />
-                  {t("listProperty")}
+                  <span className="hidden sm:inline-block">{t("addProperty")}</span>
                 </Link>
               ) : (
                 <Link
                   href={`/${locale}/login`}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
+                  className="flex-1 flex items-center justify-center gap-3 rounded-lg bg-primary px-6 py-5 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark w-full sm:w-auto"
                 >
                   <Tag className="size-5" />
-                  {t("addProperty")}
+                  <span className="hidden sm:inline-block">{t("addProperty")}</span>
                 </Link>
               )}
               <Link
                 href={`/${locale}/directory/register`}
-                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-8 py-4 text-base font-semibold text-foreground transition-colors hover:bg-muted"
+                className="flex-1 flex items-center justify-center gap-3 rounded-lg border border-border bg-background px-6 py-5 text-base font-semibold text-foreground transition-colors hover:bg-muted w-full sm:w-auto"
               >
                 <Users className="size-5" />
-                {t("realEstateAgents")}
+                <span className="hidden sm:inline-block">real-estate-agents</span>
               </Link>
             </div>
           </div>
