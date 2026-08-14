@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getTeableConfig, TeableClient, type SqlRow, qiTable } from "./teable/client";
+import { getTeableConfig, TeableClient, type SqlRow, qiTable, linkId } from "./teable/client";
 import { lit, qi } from "./teable/sql";
 import { DB_TABLES, TABLES } from "./teable/tables";
 import { FIELDS } from "./teable/fields.generated";
@@ -32,24 +32,10 @@ export interface FavoriteProperty {
 }
 
 function parseFavoriteRow(row: SqlRow): FavoriteRecord {
-  const userField = row.User;
-  const propertyField = row.Property;
-  const userId =
-    typeof userField === "string"
-      ? userField
-      : Array.isArray(userField)
-        ? String(userField[0]?.id ?? userField[0]?.__id ?? "")
-        : "";
-  const propertyId =
-    typeof propertyField === "string"
-      ? propertyField
-      : Array.isArray(propertyField)
-        ? String(propertyField[0]?.id ?? propertyField[0]?.__id ?? "")
-        : "";
   return {
-    favoriteKey: String(row.Favorite_Key ?? ""),
-    userId,
-    propertyId,
+    favoriteKey: String(row.__id ?? row.Favorite_Key ?? ""),
+    userId: linkId(row.User) ?? "",
+    propertyId: linkId(row.Property) ?? "",
     active: row.Active === true,
     createdAt: String(row.Created ?? ""),
   };
@@ -125,7 +111,7 @@ export async function toggleFavorite(
 
   const existingSql =
     "SELECT " +
-    qi("Favorite_Key") +
+    qi("__id") +
     " FROM " +
     qiTable(DB_TABLES.Property_Favorites) +
     " WHERE " +
@@ -142,7 +128,7 @@ export async function toggleFavorite(
   const existing = await client.runSql<SqlRow>(existingSql);
 
   if (existing.length > 0) {
-    const favKey = String(existing[0].Favorite_Key ?? "");
+    const favKey = String(existing[0].__id ?? "");
     await client.updateRecord(TABLES.Property_Favorites, favKey, {
       [favFields.Active.id]: false,
     });

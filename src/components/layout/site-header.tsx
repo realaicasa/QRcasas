@@ -11,7 +11,6 @@ const COPY = {
   tagline: { en: "Property marketplace for Quintana Roo", es: "Mercado inmobiliario de Quintana Roo" },
   realtors: { en: "Realtors", es: "Agentes" },
   properties: { en: "Properties", es: "Propiedades" },
-  getStarted: { en: "List a property", es: "Publicar propiedad" },
   portal: { en: "My account", es: "Mi cuenta" },
   signIn: { en: "Sign in", es: "Iniciar sesión" },
   register: { en: "Create account", es: "Crear cuenta" },
@@ -75,12 +74,6 @@ export default async function SiteHeader({ locale }: SiteHeaderProps) {
 
           {isLoggedIn ? (
             <>
-              <Link
-                href={`/${locale}/account/properties/new`}
-                className="hidden rounded-lg border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted md:inline-flex"
-              >
-                {t("getStarted")}
-              </Link>
               <Link
                 href={`/${locale}/account`}
                 className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"

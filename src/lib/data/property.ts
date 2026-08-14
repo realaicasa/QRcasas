@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getTeableConfig, TeableClient, type SqlRow, qiTable } from "./teable/client";
+import { getTeableConfig, TeableClient, type SqlRow, qiTable, linkId, linkTitle } from "./teable/client";
 import { lit, qi } from "./teable/sql";
 import { DB_TABLES, TABLES } from "./teable/tables";
 import { FIELDS } from "./teable/fields.generated";
@@ -39,6 +39,8 @@ export interface PropertyRecord {
   furnished: string | null;
   laundry: string | null;
   location: PropertyLocation;
+  locationNames: PropertyLocation;
+  clientId: string | null;
   updatedAt: string;
   seoTitle: string | null;
   seoTitleEn: string | null;
@@ -86,9 +88,12 @@ function parsePropertyRow(row: SqlRow): PropertyRecord {
         }))
     : [];
 
-  const city = row.City != null ? String(row.City) : null;
-  const area = row.Area != null ? String(row.Area) : null;
-  const development = row.Development != null ? String(row.Development) : null;
+  const city = linkId(row.City);
+  const area = linkId(row.Area);
+  const development = linkId(row.Development);
+  const cityName = linkTitle(row.City);
+  const areaName = linkTitle(row.Area);
+  const developmentName = linkTitle(row.Development);
 
   return {
     id: String(row.__id ?? ""),
@@ -116,6 +121,8 @@ function parsePropertyRow(row: SqlRow): PropertyRecord {
     furnished: row.Furnished != null ? String(row.Furnished) : null,
     laundry: row.Laundry != null ? String(row.Laundry) : null,
     location: { city, area, development },
+    locationNames: { city: cityName, area: areaName, development: developmentName },
+    clientId: linkId(row.Client),
     updatedAt: row.Updated != null ? String(row.Updated) : "",
     seoTitle: row.SEO_Title != null ? String(row.SEO_Title) : null,
     seoTitleEn: row.SEO_Title_En != null ? String(row.SEO_Title_En) : null,
@@ -157,6 +164,7 @@ export async function getPublicPropertyBySlug(slug: string): Promise<PropertyPag
       qi("Latitude"), qi("Longitude"), qi("Featured"), qi("Verified"),
       qi("Wi_Fi"), qi("Elevator"), qi("Pool"), qi("Furnished"), qi("Laundry"),
       qi("City"), qi("Area"), qi("Development"),
+      qi("Client"),
       qi("SEO_Title"), qi("SEO_Title_En"), qi("SEO_Title_Es"),
       qi("SEO_Description"), qi("SEO_Description_En"), qi("SEO_Description_Es"),
       qi("SEO_Keywords"), qi("OG_Image_Override"),
@@ -171,28 +179,23 @@ export async function getPublicPropertyBySlug(slug: string): Promise<PropertyPag
 
   const property = parsePropertyRow(rows[0]);
 
-  // Fetch advertiser if present
-  const advSql =
-    "SELECT " +
-    [qi("Display_Name"), qi("Business_Name"), qi("Tagline"), qi("Logo"), qi("Identity_Verified")].join(", ") +
-    " FROM " + qiTable(DB_TABLES.Properties) +
-    " WHERE " + qi("__id") + " = " + lit(property.id);
-  const advRows = await client.runSql<SqlRow>(advSql);
-  const advertiser = advRows.length > 0 ? parseAdvertiserRow(advRows[0]) : null;
-
-  // Location labels for the city/area/development IDs
-  const locationLabels: Record<string, string> = {};
-  const locIds = [property.location.city, property.location.area, property.location.development].filter(Boolean) as string[];
-  if (locIds.length > 0) {
-    const locSql =
-      "SELECT " + [qi("__id"), qi("Name")].join(", ") +
-      " FROM " + qiTable(DB_TABLES.Properties) +
-      " WHERE " + qi("__id") + " IN (" + locIds.map((id) => lit(id)).join(", ") + ")";
-    const locRows = await client.runSql<SqlRow>(locSql);
-    for (const r of locRows) {
-      locationLabels[String(r.__id)] = String(r.Name ?? "");
-    }
+  // Fetch advertiser (the linked Client record) if present.
+  let advertiser: AdvertiserInfo | null = null;
+  if (property.clientId) {
+    const advSql =
+      "SELECT " +
+      [qi("Display_Name"), qi("Business_Name"), qi("Tagline"), qi("Logo"), qi("Identity_Verified")].join(", ") +
+      " FROM " + qiTable(DB_TABLES.Agents) +
+      " WHERE " + qi("__id") + " = " + lit(property.clientId);
+    const advRows = await client.runSql<SqlRow>(advSql);
+    advertiser = advRows.length > 0 ? parseAdvertiserRow(advRows[0]) : null;
   }
+
+  // Location labels come from the linked location records returned on the property.
+  const locationLabels: Record<string, string> = {};
+  if (property.location.city && property.locationNames.city) locationLabels[property.location.city] = property.locationNames.city;
+  if (property.location.area && property.locationNames.area) locationLabels[property.location.area] = property.locationNames.area;
+  if (property.location.development && property.locationNames.development) locationLabels[property.location.development] = property.locationNames.development;
 
   return { property, advertiser, locationLabels };
 }
@@ -209,6 +212,7 @@ export async function getPropertyById(propertyId: string): Promise<PropertyRecor
       qi("Latitude"), qi("Longitude"), qi("Featured"), qi("Verified"),
       qi("Wi_Fi"), qi("Elevator"), qi("Pool"), qi("Furnished"), qi("Laundry"),
       qi("City"), qi("Area"), qi("Development"),
+      qi("Client"),
       qi("SEO_Title"), qi("SEO_Title_En"), qi("SEO_Title_Es"),
       qi("SEO_Description"), qi("SEO_Description_En"), qi("SEO_Description_Es"),
       qi("SEO_Keywords"), qi("OG_Image_Override"),
@@ -231,6 +235,177 @@ export async function updateProperty(
 
 export function propertyCacheTags(slug: string): string[] {
   return [TAGS.PROPERTIES, TAGS.PROPERTIES + ":" + slug];
+}
+
+export type PropertyStatus = "active" | "expiring_soon" | "archived";
+
+export interface AgentPropertyListItem {
+  id: string;
+  slug: string;
+  title: string;
+  price: number | null;
+  currency: string | null;
+  listingType: string | null;
+  bedrooms: number | null;
+  bathrooms: number | null;
+  interiorArea: number | null;
+  areaUnit: string | null;
+  photos: { url?: string; signedUrl?: string }[];
+  publicLocation: string | null;
+  featured: boolean;
+  published: boolean;
+  status: PropertyStatus;
+  createdAt: string;
+  expiryDate: string;
+  daysUntilExpiry: number;
+  enquiryCount: number;
+}
+
+/** Derive property status from created date (13-week lifecycle). */
+function derivePropertyStatus(createdAt: string): {
+  status: PropertyStatus;
+  expiryDate: string;
+  daysUntilExpiry: number;
+} {
+  const created = new Date(createdAt);
+  const expiry = new Date(created);
+  expiry.setDate(expiry.getDate() + 13 * 7); // 13 weeks
+
+  const now = new Date();
+  const msUntilExpiry = expiry.getTime() - now.getTime();
+  const daysUntilExpiry = Math.ceil(msUntilExpiry / (1000 * 60 * 60 * 24));
+
+  let status: PropertyStatus;
+  if (daysUntilExpiry > 14) {
+    status = "active";
+  } else if (daysUntilExpiry > 0) {
+    status = "expiring_soon";
+  } else {
+    status = "archived";
+  }
+
+  return { status, expiryDate: expiry.toISOString(), daysUntilExpiry };
+}
+
+/** Get all properties for an agent, with status and enquiry counts. */
+export async function getPropertiesByAgent(agentId: string): Promise<AgentPropertyListItem[]> {
+  const client = new TeableClient(getTeableConfig());
+
+  const sql =
+    "SELECT " +
+    [
+      qi("__id"), qi("Public_Slug"), qi("Title"), qi("Price"), qi("Currency"),
+      qi("Listing_Type"), qi("Bedrooms"), qi("Bathrooms"),
+      qi("Interior_Area"), qi("Area_Unit"), qi("Photos"),
+      qi("Public_Location"), qi("Featured"), qi("Published"),
+      qi("Created"),
+    ].join(", ") +
+    " FROM " + qiTable(DB_TABLES.Properties) +
+    " WHERE " + qi("Client") + " = " + lit(agentId) +
+    " ORDER BY " + qi("Created") + " DESC";
+
+  const rows = await client.runSql<SqlRow>(sql);
+
+  return rows.map((row) => {
+    const photos = Array.isArray(row.Photos)
+      ? (row.Photos as unknown[])
+          .filter((a): a is Record<string, unknown> => typeof a === "object" && a != null)
+          .map((a) => ({
+            url: typeof a.url === "string" ? a.url : undefined,
+            signedUrl: typeof a.signedUrl === "string" ? a.signedUrl : undefined,
+          }))
+      : [];
+
+    const createdAt = row.Created != null ? String(row.Created) : new Date().toISOString();
+    const { status, expiryDate, daysUntilExpiry } = derivePropertyStatus(createdAt);
+
+    return {
+      id: String(row.__id ?? ""),
+      slug: row.Public_Slug != null ? String(row.Public_Slug) : "",
+      title: row.Title != null ? String(row.Title) : (row.Property != null ? String(row.Property) : ""),
+      price: row.Price != null ? Number(row.Price) : null,
+      currency: row.Currency != null ? String(row.Currency) : null,
+      listingType: row.Listing_Type != null ? String(row.Listing_Type) : null,
+      bedrooms: row.Bedrooms != null ? Number(row.Bedrooms) : null,
+      bathrooms: row.Bathrooms != null ? Number(row.Bathrooms) : null,
+      interiorArea: row.Interior_Area != null ? Number(row.Interior_Area) : null,
+      areaUnit: row.Area_Unit != null ? String(row.Area_Unit) : null,
+      photos,
+      publicLocation: row.Public_Location != null ? String(row.Public_Location) : null,
+      featured: row.Featured === true,
+      published: row.Published === true,
+      status,
+      createdAt,
+      expiryDate,
+      daysUntilExpiry,
+      enquiryCount: 0, // TODO: wire when Enquiries table is created
+    };
+  });
+}
+
+/** Create a new property record in Teable. Returns the new record id. */
+export async function createProperty(
+  agentId: string,
+  data: {
+    title: string;
+    description?: string;
+    keyFeatures?: string;
+    price?: number;
+    currency?: string;
+    listingType?: string;
+    listingTerm?: string;
+    bedrooms?: number;
+    bathrooms?: number;
+    interiorArea?: number;
+    areaUnit?: string;
+    publicLocation?: string;
+    seoTitleEn?: string;
+    seoTitleEs?: string;
+    seoDescriptionEn?: string;
+    seoDescriptionEs?: string;
+    seoKeywords?: string;
+  },
+): Promise<string> {
+  const client = new TeableClient(getTeableConfig());
+  const now = new Date();
+  const expiry = new Date(now);
+  expiry.setDate(expiry.getDate() + 13 * 7); // 13 weeks
+
+  const record = await client.createRecord(TABLES.Properties, {
+    Title: data.title || null,
+    Description: data.description || null,
+    Key_Features: data.keyFeatures || null,
+    Price: data.price ?? null,
+    Currency: data.currency || null,
+    Listing_Type: data.listingType || null,
+    Listing_Term: data.listingTerm || null,
+    Bedrooms: data.bedrooms ?? null,
+    Bathrooms: data.bathrooms ?? null,
+    Interior_Area: data.interiorArea ?? null,
+    Area_Unit: data.areaUnit || null,
+    Public_Location: data.publicLocation || null,
+    Public_Slug: slugify(data.title),
+    Client: agentId,
+    Published: false,
+    SEO_Title_En: data.seoTitleEn || null,
+    SEO_Title_Es: data.seoTitleEs || null,
+    SEO_Description_En: data.seoDescriptionEn || null,
+    SEO_Description_Es: data.seoDescriptionEs || null,
+    SEO_Keywords: data.seoKeywords || null,
+  });
+
+  await invalidate({ tags: [TAGS.PROPERTIES] });
+  return record.id;
+}
+
+/** Generate a URL-safe slug from a title. */
+function slugify(title: string): string {
+  return title
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 export interface PropertyListItem {

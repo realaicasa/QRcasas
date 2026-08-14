@@ -3,9 +3,11 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getCustomerAuth } from "@/lib/customer-auth";
 import { getAgentByUserId } from "@/lib/data/agents";
+import { createProperty } from "@/lib/data/property";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
-import PropertyForm from "@/components/properties/property-form";
+import PropertyCreateFlow from "@/components/properties/property-create-flow";
 import type { PropertyFormData } from "@/components/properties/property-form";
+import type { PricingTier } from "@/components/pricing/pricing-modal";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -34,13 +36,34 @@ export default async function NewPropertyPage({
   }
 
   const agent = await getAgentByUserId(session.userId);
-  if (!agent || agent.tierLevel !== "Pro_Plus") {
-    redirect(`/${locale}/account/properties`);
+  if (!agent) {
+    redirect(`/${locale}/directory/register`);
   }
+  const agentId = agent.id;
+  const agentTierLevel = agent.tierLevel;
 
-  async function handleCreate(data: PropertyFormData) {
+  async function handleCreate(data: PropertyFormData, tier: PricingTier) {
     "use server";
-    // TODO: Create property record in Teable
+    await createProperty(agentId, {
+      title: data.title,
+      description: data.description,
+      keyFeatures: data.keyFeatures,
+      price: data.price ? Number(data.price) : undefined,
+      currency: data.currency,
+      listingType: data.listingType,
+      listingTerm: data.listingTerm,
+      bedrooms: data.bedrooms ? Number(data.bedrooms) : undefined,
+      bathrooms: data.bathrooms ? Number(data.bathrooms) : undefined,
+      interiorArea: data.interiorArea ? Number(data.interiorArea) : undefined,
+      areaUnit: data.areaUnit,
+      publicLocation: data.publicLocation,
+      seoTitleEn: data.seoTitleEn,
+      seoTitleEs: data.seoTitleEs,
+      seoDescriptionEn: data.seoDescriptionEn,
+      seoDescriptionEs: data.seoDescriptionEs,
+      seoKeywords: data.seoKeywords,
+    });
+    // TODO: Store tier.id, tier.price, expiryDate in a payment/order record
     redirect(`/${locale}/account/properties`);
   }
 
@@ -54,9 +77,10 @@ export default async function NewPropertyPage({
       <h1 className="text-2xl font-bold tracking-tight mb-6">
         {t("Add Property", "Agregar Propiedad")}
       </h1>
-      <PropertyForm
+      <PropertyCreateFlow
         locale={locale}
-        tierLevel={agent.tierLevel}
+        tierLevel={agentTierLevel}
+        agentId={agentId}
         onSubmit={handleCreate}
       />
     </main>

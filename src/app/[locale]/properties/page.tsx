@@ -5,7 +5,6 @@ import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 import PropertyCard from "@/components/properties/property-card";
 import FilterBar from "@/components/properties/filter-bar";
 import MapView from "@/components/properties/map-view";
-import { Tag } from "lucide-react";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }): Promise<Metadata> {
   const params = await searchParams;
@@ -76,23 +75,6 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
                 "Ciudades, zonas y desarrollos verificados"
               )}
             </p>
-
-            {/* CTAs */}
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href={`/${locale}/account/properties/new`}
-                className="inline-flex items-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
-              >
-                <Tag className="size-4" />
-                {t("Add property", "Publicar propiedad")}
-              </Link>
-              <Link
-                href={`/${locale}/directory/register`}
-                className="inline-flex items-center gap-2 rounded-lg border border-border bg-background px-5 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted"
-              >
-                {t("Become a realtor", "Hazte agente inmobiliario")}
-              </Link>
-            </div>
           </div>
         </div>
       </section>

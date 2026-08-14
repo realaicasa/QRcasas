@@ -1,6 +1,6 @@
 import "server-only";
 
-import { getTeableConfig, TeableClient, type SqlRow, qiTable } from "./teable/client";
+import { getTeableConfig, TeableClient, type SqlRow, qiTable, linkId } from "./teable/client";
 import { lit, qi } from "./teable/sql";
 import { DB_TABLES, TABLES } from "./teable/tables";
 import { FIELDS } from "./teable/fields.generated";
@@ -47,21 +47,10 @@ const WATCHLIST_FIELD_KEYS = [
 ];
 
 function parseRow(row: SqlRow): WatchlistRecord {
-  const userField = row.User;
-  const userId =
-    typeof userField === "string"
-      ? userField
-      : Array.isArray(userField)
-        ? String(userField[0]?.id ?? userField[0]?.__id ?? "")
-        : "";
-
-  const cityField = row.City;
-  const cityId =
-    typeof cityField === "string"
-      ? cityField
-      : Array.isArray(cityField)
-        ? String(cityField[0]?.id ?? cityField[0]?.__id ?? "")
-        : undefined;
+  const userId = linkId(row.User) ?? "";
+  const cityId = linkId(row.City) ?? undefined;
+  const areaId = linkId(row.Area) ?? undefined;
+  const devId = linkId(row.Development) ?? undefined;
 
   const filters: WatchlistFilters = {};
   if (row.Listing_Type) filters.listingType = String(row.Listing_Type) as "Sale" | "Rental";
@@ -75,21 +64,7 @@ function parseRow(row: SqlRow): WatchlistRecord {
   if (row.WiFi_Required) filters.wifi = true;
   if (row.Pool) filters.pool = row.Pool !== "None";
   if (cityId) filters.city = cityId;
-  const areaField = row.Area;
-  const areaId =
-    typeof areaField === "string"
-      ? areaField
-      : Array.isArray(areaField)
-        ? String(areaField[0]?.id ?? areaField[0]?.__id ?? "")
-        : undefined;
   if (areaId) filters.area = areaId;
-  const devField = row.Development;
-  const devId =
-    typeof devField === "string"
-      ? devField
-      : Array.isArray(devField)
-        ? String(devField[0]?.id ?? devField[0]?.__id ?? "")
-        : undefined;
   if (devId) filters.development = devId;
 
   return {

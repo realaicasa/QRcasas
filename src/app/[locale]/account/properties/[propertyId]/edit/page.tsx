@@ -35,12 +35,17 @@ export default async function EditPropertyPage({ params }: PageProps) {
   }
 
   const agent = await getAgentByUserId(session.userId);
-  if (!agent || agent.tierLevel !== "Pro_Plus") {
-    redirect(`/${locale}/account/properties`);
+  if (!agent) {
+    redirect(`/${locale}/directory/register`);
   }
 
   const property = await getPropertyById(propertyId);
   if (!property) {
+    redirect(`/${locale}/account/properties`);
+  }
+
+  // Ensure the agent owns this property
+  if (property.clientId !== agent.id) {
     redirect(`/${locale}/account/properties`);
   }
 
@@ -65,6 +70,7 @@ export default async function EditPropertyPage({ params }: PageProps) {
       seoDescriptionEs: data.seoDescriptionEs || null,
       seoKeywords: data.seoKeywords || null,
     });
+    redirect(`/${locale}/account/properties`);
   }
 
   return (

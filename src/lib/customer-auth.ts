@@ -17,13 +17,7 @@ export async function getCustomerAuth(cookieValue?: string) {
 
   const user = await getUserByEmail(sessionCookie);
   if (!user) {
-    // Graceful fallback for the mock backend: treat a signed-in email
-    // as an authenticated session so account pages render instead of looping.
-    return {
-      userId: sessionCookie,
-      email: sessionCookie,
-      preferredLanguage: "en" as const,
-    };
+    return null;
   }
 
   return {

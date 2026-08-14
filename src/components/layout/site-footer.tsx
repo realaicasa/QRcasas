@@ -2,11 +2,12 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ShieldCheck, X, HelpCircle, Download, FileText, ScrollText, Handshake } from "lucide-react";
+import { ShieldCheck, X, HelpCircle, Download, FileText, ScrollText, Handshake, Tag, Users } from "lucide-react";
 import type { Locale } from "@/lib/i18n";
 
 interface SiteFooterProps {
   locale: Locale;
+  session: { userId: string; email: string; preferredLanguage: string } | null;
 }
 
 type ModalKey = "terms" | "privacy" | "acceptableUse" | "advertiserAgreement" | "help" | "download" | null;
@@ -23,6 +24,9 @@ const COPY = {
   download: { en: "Download App", es: "Descargar Aplicación" },
   rights: { en: "All rights reserved.", es: "Todos los derechos reservados." },
   ad: { en: "Advertising and introduction platform", es: "Plataforma de publicidad e introducción" },
+  addProperty: { en: "Add property", es: "Publicar propiedad" },
+  realEstateAgents: { en: "Real estate agents", es: "Agentes inmobiliarios" },
+  listProperty: { en: "List a property", es: "Publicar una propiedad" },
 } as const;
 
 const MODAL_CONTENT: Record<Exclude<ModalKey, null>, { en: { title: string; body: string[] }; es: { title: string; body: string[] } }> = {
@@ -151,9 +155,10 @@ const MODAL_ICONS: Record<Exclude<ModalKey, null>, typeof FileText> = {
   download: Download,
 };
 
-export default function SiteFooter({ locale }: SiteFooterProps) {
+export default function SiteFooter({ locale, session }: SiteFooterProps) {
   const [activeModal, setActiveModal] = useState<ModalKey>(null);
   const t = (key: keyof typeof COPY) => COPY[key][locale];
+  const isLoggedIn = Boolean(session);
 
   const links: Array<{ key: Exclude<ModalKey, null>; label: string }> = [
     { key: "terms", label: t("terms") },
@@ -167,6 +172,38 @@ export default function SiteFooter({ locale }: SiteFooterProps) {
   return (
     <>
       <footer className="border-t border-border bg-sand/50">
+        {/* CTA Buttons */}
+        <div className="border-b border-border/60 bg-hero">
+          <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-center">
+              {isLoggedIn ? (
+                <Link
+                  href={`/${locale}/account/properties/new`}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
+                >
+                  <Tag className="size-5" />
+                  {t("listProperty")}
+                </Link>
+              ) : (
+                <Link
+                  href={`/${locale}/login`}
+                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-8 py-4 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
+                >
+                  <Tag className="size-5" />
+                  {t("addProperty")}
+                </Link>
+              )}
+              <Link
+                href={`/${locale}/directory/register`}
+                className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-background px-8 py-4 text-base font-semibold text-foreground transition-colors hover:bg-muted"
+              >
+                <Users className="size-5" />
+                {t("realEstateAgents")}
+              </Link>
+            </div>
+          </div>
+        </div>
+
         <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
           <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
             <div className="max-w-sm space-y-3">

@@ -195,6 +195,7 @@ export async function createAgent(
     [FIELDS.Agents.Default_Language.id]: input.defaultLanguage,
     [FIELDS.Agents.Tier_Level.id]: "Free",
     [FIELDS.Agents.Is_Verified.id]: false,
+    [FIELDS.Agents.User.id]: [{ id: userId }],
   });
   await invalidate({ tags: [TAGS.AGENTS] });
   return record.id;
