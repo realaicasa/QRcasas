@@ -25,7 +25,6 @@ const COPY = {
   rights: { en: "All rights reserved.", es: "Todos los derechos reservados." },
   ad: { en: "Advertising and introduction platform", es: "Plataforma de publicidad e introducción" },
   addProperty: { en: "Add property", es: "Publicar propiedad" },
-  realEstateAgents: { en: "Real estate agents", es: "Agentes inmobiliarios" },
   listProperty: { en: "List a property", es: "Publicar una propiedad" },
 } as const;
 
@@ -172,131 +171,89 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
   return (
     <>
       <footer className="border-t border-border bg-sand/50">
-        {/* CTA Buttons - Full width, prominent */}
+        {/* Primary CTA Buttons - Dominant section taking most of footer space */}
         <div className="border-b border-border/60 bg-hero">
-          <div className="mx-auto w-full px-4 py-16 sm:px-6">
-            <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mx-auto w-full px-4 py-20 sm:px-6">
+            <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-center">
               {isLoggedIn ? (
                 <Link
                   href={`/${locale}/account/properties/new`}
-                  className="flex-1 flex items-center justify-center gap-3 rounded-lg bg-primary px-6 py-5 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark w-full sm:w-auto"
+                  className="flex-1 flex items-center justify-center gap-4 rounded-xl bg-primary px-10 py-6 text-lg font-bold text-primary-foreground shadow-lg transition-colors hover:bg-primary-dark w-full sm:w-auto"
                 >
-                  <Tag className="size-5" />
+                  <Tag className="size-6" />
                   <span className="hidden sm:inline-block">{t("addProperty")}</span>
                 </Link>
               ) : (
                 <Link
                   href={`/${locale}/login`}
-                  className="flex-1 flex items-center justify-center gap-3 rounded-lg bg-primary px-6 py-5 text-base font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark w-full sm:w-auto"
+                  className="flex-1 flex items-center justify-center gap-4 rounded-xl bg-primary px-10 py-6 text-lg font-bold text-primary-foreground shadow-lg transition-colors hover:bg-primary-dark w-full sm:w-auto"
                 >
-                  <Tag className="size-5" />
+                  <Tag className="size-6" />
                   <span className="hidden sm:inline-block">{t("addProperty")}</span>
                 </Link>
               )}
               <Link
                 href={`/${locale}/directory/register`}
-                className="flex-1 flex items-center justify-center gap-3 rounded-lg border border-border bg-background px-6 py-5 text-base font-semibold text-foreground transition-colors hover:bg-muted w-full sm:w-auto"
+                className="flex-1 flex items-center justify-center gap-4 rounded-xl border-2 border-primary bg-transparent px-10 py-6 text-lg font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground w-full sm:w-auto"
               >
-                <Users className="size-5" />
+                <Users className="size-6" />
                 <span className="hidden sm:inline-block">real-estate-agents</span>
               </Link>
             </div>
           </div>
         </div>
 
-        <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
-          <div className="flex flex-col justify-between gap-6 md:flex-row md:items-start">
-            <div className="max-w-sm space-y-3">
-              <div className="flex items-center gap-2.5">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-teal-500 text-sm font-bold text-white">
-                  Q
-                </span>
-                <span className="leading-tight">
-                  <span className="block text-sm font-bold text-foreground">QRcasas</span>
-                  <span className="block text-xs text-muted-foreground">{t("tagline")}</span>
-                </span>
-              </div>
+        {/* Minimal footer links below */}
+        <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
+          <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center text-sm text-muted-foreground">
+            <div className="flex items-center gap-2">
+              <span className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-teal-500 text-xs font-bold text-white">
+                Q
+              </span>
+              <span className="font-medium text-foreground">QRcasas</span>
             </div>
-
-            <nav className="flex flex-wrap gap-x-6 gap-y-3" aria-label="Footer">
-              <Link
-                href={`/${locale}/properties`}
-                className="text-sm text-muted-foreground transition-colors hover:text-primary"
-              >
-                {t("properties")}
-              </Link>
-              <Link
-                href={`/${locale}/directory`}
-                className="text-sm text-muted-foreground transition-colors hover:text-primary"
-              >
-                {t("realtors")}
-              </Link>
-              {links.map((link) => {
-                const Icon = MODAL_ICONS[link.key];
-                return (
-                  <button
-                    key={link.key}
-                    type="button"
-                    onClick={() => setActiveModal(link.key)}
-                    className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-primary"
-                  >
-                    <Icon className="size-3.5" />
-                    {link.label}
-                  </button>
-                );
-              })}
-            </nav>
-          </div>
-
-          <div className="mt-8 flex flex-col items-start justify-between gap-3 border-t border-border/70 pt-6 text-xs text-muted-foreground sm:flex-row sm:items-center">
-            <p>© {new Date().getFullYear()} QRcasas. {t("rights")}</p>
-            <p className="flex items-center gap-1.5">
-              <ShieldCheck className="size-3.5" />
-              {t("ad")}
-            </p>
-          </div>
-        </div>
-      </footer>
-
-      {/* Modal */}
-      {activeModal && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
-          role="dialog"
-          aria-modal="true"
-          onClick={() => setActiveModal(null)}
-        >
-          <div
-            className="max-h-[80vh] w-full max-w-lg overflow-y-auto rounded-xl border border-border bg-card p-6 shadow-xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mb-4 flex items-start justify-between gap-4">
-              <div className="flex items-center gap-2.5">
-                <span className="flex size-8 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                  {(() => {
-                    const Icon = MODAL_ICONS[activeModal];
-                    return <Icon className="size-4" />;
-                  })()}
-                </span>
-                <h2 className="text-lg font-semibold">{MODAL_CONTENT[activeModal][locale].title}</h2>
-              </div>
-              <button
-                type="button"
-                onClick={() => setActiveModal(null)}
-                aria-label="Close"
-                className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              >
-                <X className="size-5" />
-              </button>
-            </div>
-            <div className="space-y-3 text-sm leading-relaxed text-muted-foreground">
-              {MODAL_CONTENT[activeModal][locale].body.map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
+            <nav className="flex flex-wrap items-center justify-center gap-4" aria-label="Footer legal">
+              {links.map(({ key, label }) => (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setActiveModal(key)}
+                  className="underline hover:text-foreground transition-colors"
+                >
+                  {label}
+                </button>
               ))}
+            </nav>
+            <div className="flex items-center gap-4">
+              <span className="text-xs">{t("rights")}</span>
+              <span className="text-xs">{t("ad")}</span>
             </div>
           </div>
         </div>
-      )}
+
+        {/* Modals */}
+        {activeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+            <div className="w-full max-w-md rounded-xl bg-card p-6 shadow-xl">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold">
+                  {MODAL_CONTENT[activeModal][locale].title}
+                </h3>
+                <button onClick={() => setActiveModal(null)} className="text-muted-foreground hover:text-foreground">
+                  <X className="size-5" />
+                </button>
+              </div>
+              <div className="space-y-3 max-h-80 overflow-y-auto">
+                {MODAL_CONTENT[activeModal][locale].body.map((paragraph, i) => (
+                  <p key={i} className="text-sm text-muted-foreground">
+                    {paragraph}
+                  </p>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </footer>
     </>
   );
 }

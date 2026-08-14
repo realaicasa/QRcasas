@@ -9,8 +9,8 @@ interface SiteHeaderProps {
 
 const COPY = {
   tagline: { en: "Property marketplace for Quintana Roo", es: "Mercado inmobiliario de Quintana Roo" },
-  realtors: { en: "Realtors", es: "Agentes" },
-  properties: { en: "Properties", es: "Propiedades" },
+  realtors: { en: "Agents (directory)", es: "Agentes (directorio)" },
+  properties: { en: "Properties (directory)", es: "Propiedades (directorio)" },
   portal: { en: "My account", es: "Mi cuenta" },
   signIn: { en: "Sign in", es: "Iniciar sesión" },
   register: { en: "Create account", es: "Crear cuenta" },
