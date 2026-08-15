@@ -25,6 +25,7 @@ const COPY = {
   rights: { en: "All rights reserved.", es: "Todos los derechos reservados." },
   ad: { en: "Advertising and introduction platform", es: "Plataforma de publicidad e introducción" },
   addProperty: { en: "Add property", es: "Publicar propiedad" },
+  agentLogin: { en: "Agent login", es: "Acceso de agentes" },
   listProperty: { en: "List a property", es: "Publicar una propiedad" },
 } as const;
 
@@ -193,11 +194,11 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
                 </Link>
               )}
               <Link
-                href={`/${locale}/directory/register`}
+                href={`/${locale}/login`}
                 className="flex-1 flex items-center justify-center gap-4 rounded-xl border-2 border-primary bg-transparent px-10 py-6 text-lg font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground w-full sm:w-auto"
               >
                 <Users className="size-6" />
-                <span className="hidden sm:inline-block">real-estate-agents</span>
+                <span className="hidden sm:inline-block">{t("agentLogin")}</span>
               </Link>
             </div>
           </div>

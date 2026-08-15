@@ -9,8 +9,8 @@ interface SiteHeaderProps {
 
 const COPY = {
   tagline: { en: "Property marketplace for Quintana Roo", es: "Mercado inmobiliario de Quintana Roo" },
-  realtors: { en: "Agents (directory)", es: "Agentes (directorio)" },
-  properties: { en: "Properties (directory)", es: "Propiedades (directorio)" },
+  realtors: { en: "Real Estate Agents", es: "Agentes inmobiliarios" },
+  properties: { en: "Properties", es: "Propiedades" },
   portal: { en: "My account", es: "Mi cuenta" },
   signIn: { en: "Sign in", es: "Iniciar sesión" },
   register: { en: "Create account", es: "Crear cuenta" },
@@ -48,16 +48,16 @@ export default async function SiteHeader({ locale }: SiteHeaderProps) {
           </Link>
         </div>
 
-        <nav className="hidden items-center gap-6 md:flex" aria-label="Main">
+        <nav className="hidden items-center gap-2 md:flex" aria-label="Main">
           <Link
             href={`/${locale}/properties`}
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+            className="inline-flex items-center rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary"
           >
             {t("properties")}
           </Link>
           <Link
             href={`/${locale}/directory`}
-            className="text-sm font-medium text-foreground/80 transition-colors hover:text-primary"
+            className="inline-flex items-center rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary"
           >
             {t("realtors")}
           </Link>
