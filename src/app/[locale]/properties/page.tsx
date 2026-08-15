@@ -5,6 +5,7 @@ import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 import PropertyCard from "@/components/properties/property-card";
 import FilterBar from "@/components/properties/filter-bar";
 import MapView from "@/components/properties/map-view";
+import { getLocationsByType } from "@/lib/data/locations";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }): Promise<Metadata> {
   const params = await searchParams;
@@ -69,6 +70,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   const offset = (page - 1) * pageSize;
 
   const { properties, total } = await getPublicProperties(filters, sort, pageSize, offset);
+  const cities = await getLocationsByType("City");
   const totalPages = Math.ceil(total / pageSize);
 
   return (
@@ -94,7 +96,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
       </section>
 
       {/* Filter Bar */}
-      <FilterBar total={total} locale={locale} />
+      <FilterBar total={total} locale={locale} cities={cities} />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
         {/* Results map */}

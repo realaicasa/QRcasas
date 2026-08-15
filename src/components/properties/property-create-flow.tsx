@@ -7,12 +7,14 @@ import PropertyForm from "@/components/properties/property-form";
 import type { PricingTier } from "@/components/pricing/pricing-modal";
 import type { PropertyFormData } from "@/components/properties/property-form";
 import type { Locale } from "@/lib/i18n";
+import type { LocationOption } from "@/lib/data/locations";
 
 interface PropertyCreateFlowProps {
   locale: Locale;
   tierLevel: string;
   agentId: string;
   onSubmit: (data: PropertyFormData, tier: PricingTier) => void | Promise<void>;
+  locations: { city: LocationOption[]; area: LocationOption[]; development: LocationOption[] };
 }
 
 export default function PropertyCreateFlow({
@@ -20,6 +22,7 @@ export default function PropertyCreateFlow({
   tierLevel,
   agentId,
   onSubmit,
+  locations,
 }: PropertyCreateFlowProps) {
   const router = useRouter();
   const [selectedTier, setSelectedTier] = useState<PricingTier | null>(null);
@@ -86,6 +89,7 @@ export default function PropertyCreateFlow({
       <PropertyForm
         locale={locale}
         tierLevel={tierLevel}
+        locations={locations}
         onSubmit={handleSubmit}
       />
     </div>

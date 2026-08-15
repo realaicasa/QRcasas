@@ -3,12 +3,18 @@
 import { useState } from "react";
 import type { PropertyRecord } from "@/lib/data/property";
 import SeoFields from "@/components/dashboard/seo-fields";
+import type { LocationOption } from "@/lib/data/locations";
 
 interface PropertyFormProps {
   locale: string;
   property?: PropertyRecord | null;
   tierLevel: string;
   onSubmit: (data: PropertyFormData) => void | Promise<void>;
+  locations?: {
+    city: LocationOption[];
+    area: LocationOption[];
+    development: LocationOption[];
+  };
 }
 
 export interface PropertyFormData {
@@ -45,9 +51,10 @@ const LISTING_TERMS = ["Monthly", "Yearly"];
 const CURRENCIES = ["USD", "MXN"];
 const AREA_UNITS = ["m²", "sq ft"];
 
-export default function PropertyForm({ locale, property, tierLevel, onSubmit }: PropertyFormProps) {
+export default function PropertyForm({ locale, property, tierLevel, onSubmit, locations }: PropertyFormProps) {
   const t = (en: string, es: string) => (locale === "es" ? es : en);
   const [saving, setSaving] = useState(false);
+  const [newLocationFields, setNewLocationFields] = useState<Record<string, boolean>>({});
 
   const [form, setForm] = useState<PropertyFormData>({
     title: property?.title ?? "",
@@ -137,24 +144,44 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit }: 
         </div>
 
         <div className="grid gap-4 sm:grid-cols-3">
-          {(["city", "area", "development"] as const).map((field) => (
+          {(["city", "area", "development"] as const).map((field) => {
+            const type = field === "city" ? "city" : field === "area" ? "area" : "development";
+            const options = locations?.[type] ?? [];
+            const label = field === "city" ? t("City", "Ciudad") : field === "area" ? t("Area", "Zona") : t("Development", "Desarrollo");
+            return (
             <div key={field}>
               <label className="block text-xs font-medium text-muted-foreground mb-1">
-                {field === "city"
-                  ? t("City", "Ciudad")
-                  : field === "area"
-                    ? t("Area", "Zona")
-                    : t("Development", "Desarrollo")}
+                {label}
               </label>
-              <input
-                type="text"
-                value={form[field]}
-                onChange={(e) => update(field, e.target.value)}
-                placeholder={field === "city" ? "Tulum" : field === "area" ? "Aldea Zama" : "Development name"}
-                className="w-full border rounded-md px-3 py-2 text-sm"
-              />
+              {newLocationFields[field] || options.length === 0 ? (
+                <input
+                  type="text"
+                  value={form[field]}
+                  onChange={(e) => update(field, e.target.value)}
+                  placeholder={label}
+                  className="w-full border rounded-md px-3 py-2 text-sm"
+                />
+              ) : (
+                <select
+                  value={form[field]}
+                  onChange={(e) => {
+                    if (e.target.value === "__new__") {
+                      update(field, "");
+                      setNewLocationFields((prev) => ({ ...prev, [field]: true }));
+                    } else {
+                      update(field, e.target.value);
+                    }
+                  }}
+                  className="w-full border rounded-md px-3 py-2 text-sm"
+                >
+                  <option value="">{t(`Select ${label}`, `Selecciona ${label}`)}</option>
+                  {options.map((option) => <option key={option.id} value={option.name}>{option.name}</option>)}
+                  <option value="__new__">{t("+ Add new location", "+ Agregar nueva ubicación")}</option>
+                </select>
+              )}
             </div>
-          ))}
+            );
+          })}
         </div>
       </div>
 

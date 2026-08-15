@@ -8,6 +8,7 @@ import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 import PropertyCreateFlow from "@/components/properties/property-create-flow";
 import type { PropertyFormData } from "@/components/properties/property-form";
 import type { PricingTier } from "@/components/pricing/pricing-modal";
+import { getLocationsByType } from "@/lib/data/locations";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -41,6 +42,11 @@ export default async function NewPropertyPage({
   }
   const agentId = agent.id;
   const agentTierLevel = agent.tierLevel;
+  const locations = {
+    city: await getLocationsByType("City"),
+    area: await getLocationsByType("Area"),
+    development: await getLocationsByType("Development"),
+  };
 
   async function handleCreate(data: PropertyFormData, tier: PricingTier) {
     "use server";
@@ -90,6 +96,7 @@ export default async function NewPropertyPage({
         locale={locale}
         tierLevel={agentTierLevel}
         agentId={agentId}
+        locations={locations}
         onSubmit={handleCreate}
       />
     </main>

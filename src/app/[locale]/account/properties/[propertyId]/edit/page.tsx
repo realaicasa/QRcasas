@@ -7,6 +7,7 @@ import { getPropertyById, updateProperty } from "@/lib/data/property";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 import PropertyForm from "@/components/properties/property-form";
 import type { PropertyFormData } from "@/components/properties/property-form";
+import { getLocationsByType } from "@/lib/data/locations";
 
 interface PageProps {
   params: Promise<{ locale: string; propertyId: string }>;
@@ -48,6 +49,12 @@ export default async function EditPropertyPage({ params }: PageProps) {
   if (property.clientId !== agent.id) {
     redirect(`/${locale}/account/properties`);
   }
+
+  const locations = {
+    city: await getLocationsByType("City"),
+    area: await getLocationsByType("Area"),
+    development: await getLocationsByType("Development"),
+  };
 
   async function handleUpdate(data: PropertyFormData) {
     "use server";
@@ -93,6 +100,7 @@ export default async function EditPropertyPage({ params }: PageProps) {
         locale={locale}
         property={property}
         tierLevel={agent.tierLevel}
+        locations={locations}
         onSubmit={handleUpdate}
       />
     </main>

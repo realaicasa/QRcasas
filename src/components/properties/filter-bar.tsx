@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Heart } from "lucide-react";
+import type { LocationOption } from "@/lib/data/locations";
 
 interface FilterBarProps {
   total: number;
   locale: string;
+  cities: LocationOption[];
 }
 
-export default function FilterBar({ total, locale }: FilterBarProps) {
+export default function FilterBar({ total, locale, cities }: FilterBarProps) {
   const [listingType, setListingType] = useState<"Sale" | "Rental">("Sale");
   const [view, setView] = useState<"list" | "map" | "split">("list");
   const router = useRouter();
@@ -121,13 +123,14 @@ export default function FilterBar({ total, locale }: FilterBarProps) {
         <div className="mt-4 grid gap-3 rounded-xl border border-border bg-background p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
           <div className="flex flex-col gap-1">
             <label className={labelClass}>{t("City", "Ciudad")}</label>
-              <input
-                type="text"
+              <select
                 name="city"
                 defaultValue={searchParams.get("city") ?? ""}
-                placeholder={t("Any city", "Cualquier ciudad")}
                 className={selectClass}
-              />
+              >
+                <option value="">{t("Any city", "Cualquier ciudad")}</option>
+                {cities.map((city) => <option key={city.id} value={city.name}>{city.name}</option>)}
+              </select>
           </div>
 
           <div className="flex flex-col gap-1">

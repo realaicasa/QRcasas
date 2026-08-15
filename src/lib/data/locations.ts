@@ -6,6 +6,36 @@ import { TABLES, DB_TABLES } from "./teable/tables";
 
 export type LocationType = "City" | "Area" | "Development";
 
+export interface LocationOption {
+  id: string;
+  name: string;
+  type: LocationType;
+}
+
+export async function getLocationsByType(type: LocationType): Promise<LocationOption[]> {
+  const client = new TeableClient(getTeableConfig());
+  try {
+    const sql =
+      "SELECT " + qi("__id") + ", " + qi("Location") + ", " + qi("Type") +
+      " FROM " + qiTable(DB_TABLES.Locations) +
+      " WHERE " + qi("Type") + " = " + lit(type) +
+      " AND " + qi("Active") + " IS TRUE" +
+      " ORDER BY " + qi("Location") + " ASC";
+    const rows = await client.runSql<SqlRow>(sql);
+    return rows
+      .map((row) => ({
+        id: String(row.__id ?? ""),
+        name: String(row.Location ?? ""),
+        type,
+      }))
+      .filter((location) => location.id && location.name)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  } catch (error) {
+    console.error(`locations lookup failed for ${type}`, error);
+    return [];
+  }
+}
+
 /** Find an existing location or create it for a logged-in advertiser. */
 export async function findOrCreateLocation(
   name: string,
