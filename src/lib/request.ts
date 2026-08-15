@@ -1,5 +1,22 @@
-const TEABLE_BASE_URL = process.env.TEABLE_API_URL ?? "";
+const TEABLE_BASE_URL = resolveTeableBaseUrl(process.env.TEABLE_API_URL);
 const TEABLE_TOKEN = process.env.TEABLE_API_TOKEN ?? "";
+
+/** Accept both the current API base and the legacy base/app URL supplied in deployment settings. */
+function resolveTeableBaseUrl(value: string | undefined): string {
+  const configured = value?.replace(/\/$/, "") ?? "";
+  if (!configured) return "";
+
+  try {
+    const url = new URL(configured);
+    if (url.hostname === "api.teable.io" || url.pathname.includes("/base/")) {
+      return "https://app.teable.ai/api";
+    }
+  } catch {
+    return configured;
+  }
+
+  return configured;
+}
 
 interface RetryConfig {
   maxRetries: number;
