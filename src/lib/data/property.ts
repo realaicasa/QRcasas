@@ -380,6 +380,11 @@ export async function createProperty(
     city?: string;
     area?: string;
     development?: string;
+    wifi?: boolean;
+    elevator?: boolean;
+    pool?: string;
+    furnished?: string;
+    laundry?: string;
     petFriendly?: boolean;
     parking?: boolean;
     nearShopping?: boolean;
@@ -423,6 +428,11 @@ export async function createProperty(
     Near_Jungle: data.nearJungle ?? false,
     Near_Beach: data.nearBeach ?? false,
     TwentyFour_Hour_Security: data.twentyFourHourSecurity ?? false,
+    Wi_Fi: data.wifi ?? false,
+    Elevator: data.elevator ?? false,
+    Pool: data.pool || "None",
+    Furnished: data.furnished || "Unfurnished",
+    Laundry: data.laundry || "None",
     Public_Slug: slugify(data.title),
     Client: agentId,
     Published: false,

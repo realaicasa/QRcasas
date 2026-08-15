@@ -33,6 +33,11 @@ export interface PropertyFormData {
   city: string;
   area: string;
   development: string;
+  wifi: boolean;
+  elevator: boolean;
+  pool: string;
+  furnished: string;
+  laundry: string;
   petFriendly: boolean;
   parking: boolean;
   nearShopping: boolean;
@@ -50,6 +55,9 @@ const LISTING_TYPES = ["Sale", "Rental"];
 const LISTING_TERMS = ["Monthly", "Yearly"];
 const CURRENCIES = ["USD", "MXN"];
 const AREA_UNITS = ["m²", "sq ft"];
+const POOL_OPTIONS = ["Private", "Shared", "None"];
+const FURNISHED_OPTIONS = ["Furnished", "Part furnished", "Unfurnished"];
+const LAUNDRY_OPTIONS = ["In unit", "Hookups", "Shared", "None"];
 
 export default function PropertyForm({ locale, property, tierLevel, onSubmit, locations }: PropertyFormProps) {
   const t = (en: string, es: string) => (locale === "es" ? es : en);
@@ -72,6 +80,11 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
     city: "",
     area: "",
     development: "",
+    wifi: property?.wifi ?? false,
+    elevator: property?.elevator ?? false,
+    pool: property?.pool ?? "None",
+    furnished: property?.furnished ?? "Unfurnished",
+    laundry: property?.laundry ?? "None",
     petFriendly: false,
     parking: false,
     nearShopping: false,
@@ -187,7 +200,33 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
 
       <div className="border rounded-lg p-4 space-y-4">
         <h3 className="font-medium text-sm">{t("Features", "Características")}</h3>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2">
+          {([
+            ["wifi", "WiFi", "WiFi"],
+            ["elevator", "Elevator", "Ascensor"],
+          ] as const).map(([field, en, es]) => (
+            <label key={field} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form[field]}
+                onChange={(e) => update(field, e.target.checked)}
+                className="size-4 rounded border-border text-primary"
+              />
+              {t(en, es)}
+            </label>
+          ))}
+          {([
+            ["pool", "Pool", "Piscina", POOL_OPTIONS],
+            ["furnished", "Furnished", "Amueblado", FURNISHED_OPTIONS],
+            ["laundry", "Laundry", "Lavandería", LAUNDRY_OPTIONS],
+          ] as const).map(([field, en, es, options]) => (
+            <label key={field} className="text-sm">
+              <span className="mb-1 block text-xs font-medium text-muted-foreground">{t(en, es)}</span>
+              <select value={form[field]} onChange={(e) => update(field, e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm">
+                {options.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+            </label>
+          ))}
           {([
             ["petFriendly", "Pet friendly", "Admite mascotas"],
             ["parking", "Parking", "Estacionamiento"],
