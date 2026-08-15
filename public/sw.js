@@ -1,4 +1,4 @@
-const CACHE_NAME = "qrcasas-v3";
+const CACHE_NAME = "qrcasas-v4";
 const CORE_ASSETS = [
   "/icons/icon-192.png",
   "/icons/icon-512.png",
@@ -38,6 +38,17 @@ self.addEventListener("fetch", (event) => {
         })
         .catch(() => caches.match(request).then((cached) => cached || caches.match("/")))
     );
+    return;
+  }
+
+  // Next.js RSC payloads and build assets must always come from the network.
+  // Caching them can keep an older server-component flow alive on phones.
+  if (
+    url.pathname.startsWith("/_next/") ||
+    request.headers.get("RSC") === "1" ||
+    request.headers.get("Next-Router-Prefetch") === "1" ||
+    request.headers.get("Next-Router-State-Tree")
+  ) {
     return;
   }
 

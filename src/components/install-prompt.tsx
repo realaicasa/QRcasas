@@ -14,7 +14,7 @@ export default function InstallPrompt() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js?v=3").catch(() => undefined);
+      navigator.serviceWorker.register("/sw.js?v=4").catch(() => undefined);
     }
 
     const onBeforeInstallPrompt = (e: Event) => {
@@ -50,7 +50,7 @@ export default function InstallPrompt() {
     <button
       type="button"
       onClick={install}
-      className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105"
+      className="fixed bottom-5 left-4 right-4 z-50 inline-flex max-w-[calc(100vw-2rem)] items-center justify-center gap-2 truncate rounded-full bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-lg shadow-primary/30 transition-transform hover:scale-105 sm:left-auto sm:right-5"
     >
       <Download className="size-4" />
       Install app

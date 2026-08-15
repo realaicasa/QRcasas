@@ -36,8 +36,8 @@ export default async function SiteHeader({ locale }: SiteHeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/70 bg-background/85 backdrop-blur-md">
-      <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-4 px-4 sm:px-6">
-        <div className="flex items-center gap-3">
+      <div className="mx-auto flex min-h-16 w-full max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:gap-4 sm:px-6 sm:py-0">
+        <div className="order-1 flex min-w-0 items-center gap-2 sm:gap-3">
           <Link
             href={`/${locale}/properties`}
             className="flex items-center gap-2.5"
@@ -50,14 +50,14 @@ export default async function SiteHeader({ locale }: SiteHeaderProps) {
               <span className="block text-base font-bold tracking-tight text-foreground">
                 QRcasas
               </span>
-              <span className="block text-[11px] text-muted-foreground">
+              <span className="hidden text-[11px] text-muted-foreground sm:block">
                 {t("tagline")}
               </span>
             </span>
           </Link>
         </div>
 
-        <nav className="flex items-center gap-1 sm:gap-2" aria-label="Main">
+        <nav className="order-3 flex w-full items-center justify-center gap-1 sm:order-2 sm:w-auto sm:justify-start sm:gap-2" aria-label="Main">
           <Link
             href={`/${locale}/properties`}
             className="inline-flex items-center rounded-lg border border-border px-2 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary sm:px-4 sm:py-2 sm:text-sm"
@@ -72,7 +72,7 @@ export default async function SiteHeader({ locale }: SiteHeaderProps) {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-2 sm:gap-3">
+        <div className="order-2 flex items-center gap-1 sm:order-3 sm:gap-3">
           <Link
             href={`/${other}/properties`}
             className="rounded-md px-2.5 py-1.5 text-sm font-semibold text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
