@@ -6,6 +6,8 @@ import { DB_TABLES, TABLES } from "./teable/tables";
 import { FIELDS } from "./teable/fields.generated";
 import { publicEligibilityWhere } from "./eligibility";
 import { TAGS, invalidate } from "./cache";
+import { findOrCreateLocation } from "./locations";
+import { countContactDetailsOpens } from "./activity";
 
 export interface PropertyLocation {
   city: string | null;
@@ -29,6 +31,12 @@ export interface PropertyRecord {
   areaUnit: string | null;
   photos: { url?: string; signedUrl?: string }[];
   publicLocation: string | null;
+  petFriendly: boolean;
+  parking: boolean;
+  nearShopping: boolean;
+  nearJungle: boolean;
+  nearBeach: boolean;
+  twentyFourHourSecurity: boolean;
   latitude: number | null;
   longitude: number | null;
   featured: boolean;
@@ -68,6 +76,8 @@ export function resolveSeoDescription(property: PropertyRecord, locale: "en" | "
 export interface AdvertiserInfo {
   displayName: string;
   tagline: string | null;
+  contactChannel: string | null;
+  contactValue: string | null;
   logo: { url?: string; signedUrl?: string }[];
   identityVerified: boolean;
 }
@@ -111,6 +121,12 @@ function parsePropertyRow(row: SqlRow): PropertyRecord {
     areaUnit: row.Area_Unit != null ? String(row.Area_Unit) : null,
     photos,
     publicLocation: row.Public_Location != null ? String(row.Public_Location) : null,
+    petFriendly: row.Pet_Friendly === true,
+    parking: row.Parking === true,
+    nearShopping: row.Near_Shopping === true,
+    nearJungle: row.Near_Jungle === true,
+    nearBeach: row.Near_Beach === true,
+    twentyFourHourSecurity: row.TwentyFour_Hour_Security === true,
     latitude: row.Latitude != null ? Number(row.Latitude) : null,
     longitude: row.Longitude != null ? Number(row.Longitude) : null,
     featured: row.Featured === true,
@@ -147,6 +163,8 @@ function parseAdvertiserRow(row: SqlRow): AdvertiserInfo {
   return {
     displayName: row.Display_Name != null ? String(row.Display_Name) : (row.Business_Name != null ? String(row.Business_Name) : "Advertiser"),
     tagline: row.Tagline != null ? String(row.Tagline) : null,
+    contactChannel: row.Primary_Contact_Channel != null ? String(row.Primary_Contact_Channel) : null,
+    contactValue: row.Primary_Contact_Value != null ? String(row.Primary_Contact_Value) : null,
     logo,
     identityVerified: row.Identity_Verified === true,
   };
@@ -184,7 +202,7 @@ export async function getPublicPropertyBySlug(slug: string): Promise<PropertyPag
   if (property.clientId) {
     const advSql =
       "SELECT " +
-      [qi("Display_Name"), qi("Business_Name"), qi("Tagline"), qi("Logo"), qi("Identity_Verified")].join(", ") +
+      [qi("Display_Name"), qi("Business_Name"), qi("Tagline"), qi("Logo"), qi("Identity_Verified"), qi("Primary_Contact_Channel"), qi("Primary_Contact_Value")].join(", ") +
       " FROM " + qiTable(DB_TABLES.Agents) +
       " WHERE " + qi("__id") + " = " + lit(property.clientId);
     const advRows = await client.runSql<SqlRow>(advSql);
@@ -306,7 +324,7 @@ export async function getPropertiesByAgent(agentId: string): Promise<AgentProper
 
   const rows = await client.runSql<SqlRow>(sql);
 
-  return rows.map((row) => {
+  return Promise.all(rows.map(async (row) => {
     const photos = Array.isArray(row.Photos)
       ? (row.Photos as unknown[])
           .filter((a): a is Record<string, unknown> => typeof a === "object" && a != null)
@@ -338,9 +356,9 @@ export async function getPropertiesByAgent(agentId: string): Promise<AgentProper
       createdAt,
       expiryDate,
       daysUntilExpiry,
-      enquiryCount: 0, // TODO: wire when Enquiries table is created
+      enquiryCount: await countContactDetailsOpens(String(row.__id ?? "")),
     };
-  });
+  }));
 }
 
 /** Create a new property record in Teable. Returns the new record id. */
@@ -359,6 +377,15 @@ export async function createProperty(
     interiorArea?: number;
     areaUnit?: string;
     publicLocation?: string;
+    city?: string;
+    area?: string;
+    development?: string;
+    petFriendly?: boolean;
+    parking?: boolean;
+    nearShopping?: boolean;
+    nearJungle?: boolean;
+    nearBeach?: boolean;
+    twentyFourHourSecurity?: boolean;
     seoTitleEn?: string;
     seoTitleEs?: string;
     seoDescriptionEn?: string;
@@ -367,6 +394,9 @@ export async function createProperty(
   },
 ): Promise<string> {
   const client = new TeableClient(getTeableConfig());
+  const cityId = await findOrCreateLocation(data.city ?? "", "City");
+  const areaId = await findOrCreateLocation(data.area ?? "", "Area", cityId ?? undefined);
+  const developmentId = await findOrCreateLocation(data.development ?? "", "Development", areaId ?? undefined);
   const now = new Date();
   const expiry = new Date(now);
   expiry.setDate(expiry.getDate() + 13 * 7); // 13 weeks
@@ -384,6 +414,15 @@ export async function createProperty(
     Interior_Area: data.interiorArea ?? null,
     Area_Unit: data.areaUnit || null,
     Public_Location: data.publicLocation || null,
+    City: cityId ? [{ id: cityId }] : null,
+    Area: areaId ? [{ id: areaId }] : null,
+    Development: developmentId ? [{ id: developmentId }] : null,
+    Pet_Friendly: data.petFriendly ?? false,
+    Parking: data.parking ?? false,
+    Near_Shopping: data.nearShopping ?? false,
+    Near_Jungle: data.nearJungle ?? false,
+    Near_Beach: data.nearBeach ?? false,
+    TwentyFour_Hour_Security: data.twentyFourHourSecurity ?? false,
     Public_Slug: slugify(data.title),
     Client: agentId,
     Published: false,
@@ -421,6 +460,12 @@ export interface PropertyListItem {
   areaUnit: string | null;
   photos: { url?: string; signedUrl?: string }[];
   publicLocation: string | null;
+  petFriendly: boolean;
+  parking: boolean;
+  nearShopping: boolean;
+  nearJungle: boolean;
+  nearBeach: boolean;
+  twentyFourHourSecurity: boolean;
   latitude: number | null;
   longitude: number | null;
   featured: boolean;
@@ -433,6 +478,14 @@ export interface PropertyListFilters {
   maxPrice?: number;
   bedrooms?: number;
   location?: string;
+  petFriendly?: boolean;
+  parking?: boolean;
+  nearShopping?: boolean;
+  nearJungle?: boolean;
+  nearBeach?: boolean;
+  twentyFourHourSecurity?: boolean;
+  wifi?: boolean;
+  elevator?: boolean;
 }
 
 export type PropertySortOption = "newest" | "price_asc" | "price_desc";
@@ -464,6 +517,19 @@ export async function getPublicProperties(
       qi("Public_Location") + " ILIKE " + lit("%" + filters.location + "%")
     );
   }
+  const featureFilters: Array<[keyof PropertyListFilters, string]> = [
+    ["wifi", "Wi_Fi"],
+    ["elevator", "Elevator"],
+    ["petFriendly", "Pet_Friendly"],
+    ["parking", "Parking"],
+    ["nearShopping", "Near_Shopping"],
+    ["nearJungle", "Near_Jungle"],
+    ["nearBeach", "Near_Beach"],
+    ["twentyFourHourSecurity", "TwentyFour_Hour_Security"],
+  ];
+  for (const [filter, field] of featureFilters) {
+    if (filters[filter] === true) whereClauses.push(qi(field) + " IS TRUE");
+  }
 
   const where = whereClauses.join(" AND ");
 
@@ -486,7 +552,8 @@ export async function getPublicProperties(
       qi("Listing_Type"), qi("Bedrooms"), qi("Bathrooms"),
       qi("Interior_Area"), qi("Area_Unit"), qi("Photos"),
       qi("Public_Location"), qi("Latitude"), qi("Longitude"),
-      qi("Featured"), qi("Updated"),
+      qi("Featured"), qi("Pet_Friendly"), qi("Parking"), qi("Near_Shopping"),
+      qi("Near_Jungle"), qi("Near_Beach"), qi("TwentyFour_Hour_Security"), qi("Updated"),
     ].join(", ") +
     " FROM " + qiTable(DB_TABLES.Properties) +
     " WHERE " + where +
@@ -519,6 +586,12 @@ export async function getPublicProperties(
       areaUnit: row.Area_Unit != null ? String(row.Area_Unit) : null,
       photos,
       publicLocation: row.Public_Location != null ? String(row.Public_Location) : null,
+      petFriendly: row.Pet_Friendly === true,
+      parking: row.Parking === true,
+      nearShopping: row.Near_Shopping === true,
+      nearJungle: row.Near_Jungle === true,
+      nearBeach: row.Near_Beach === true,
+      twentyFourHourSecurity: row.TwentyFour_Hour_Security === true,
       latitude: row.Latitude != null ? Number(row.Latitude) : null,
       longitude: row.Longitude != null ? Number(row.Longitude) : null,
       featured: row.Featured === true,

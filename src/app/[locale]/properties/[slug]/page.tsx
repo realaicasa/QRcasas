@@ -7,6 +7,7 @@ import { ArrowLeft, MapPin, BedDouble, Bath, Maximize, Home, Share2, Wifi, Armch
 import { getCustomerAuth } from "@/lib/customer-auth";
 import { absoluteUrl } from "@/lib/request";
 import EnquiryForm from "@/components/properties/enquiry-form";
+import ContactDetailsModal from "@/components/properties/contact-details-modal";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -316,13 +317,14 @@ export default async function PropertyPage({
           </div>
         )}
 
-      {/* Enquiry form */}
-      <EnquiryForm
-        locale={locale}
-        propertyId={property.id}
-        propertyName={property.title}
-        customerInfo={customerInfo ?? undefined}
-      />
+      {advertiser && (
+        <ContactDetailsModal
+          locale={locale}
+          propertyId={property.id}
+          propertyName={property.title}
+          advertiser={advertiser}
+        />
+      )}
 
         {/* Map placeholder */}
         {property.latitude != null && property.longitude != null && (

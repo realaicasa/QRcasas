@@ -129,6 +129,12 @@ export const FIELDS: Record<string, Record<string, FieldMeta>> = {
     Pool: { id: "Pool", real: "Pool", fieldId: "fldsXsTw5R05ERJWSQK", type: "singleSelect", camel: "pool" },
     Furnished: { id: "Furnished", real: "Furnished", fieldId: "fld2onaAmqr0i2K6Xmz", type: "singleSelect", camel: "furnished" },
     Laundry: { id: "Laundry", real: "Laundry", fieldId: "fld31nOVYI2V9lGoNJA", type: "singleSelect", camel: "laundry" },
+    Pet_Friendly: { id: "Pet_Friendly", real: "Pet Friendly", fieldId: "fldX3kvncUIw0KMu47G", type: "checkbox", camel: "petFriendly" },
+    Parking: { id: "Parking", real: "Parking", fieldId: "fldLlRq74M1z3X6Z83j", type: "checkbox", camel: "parking" },
+    Near_Shopping: { id: "Near_Shopping", real: "Near Shopping", fieldId: "fldcgQOZdfKA4LVkNEv", type: "checkbox", camel: "nearShopping" },
+    Near_Jungle: { id: "Near_Jungle", real: "Near Jungle", fieldId: "fldwENpEJo5epoUMmKb", type: "checkbox", camel: "nearJungle" },
+    Near_Beach: { id: "Near_Beach", real: "Near Beach", fieldId: "fldcuo2Z37aEj3vtwHA", type: "checkbox", camel: "nearBeach" },
+    TwentyFour_Hour_Security: { id: "TwentyFour_Hour_Security", real: "24 Hour Security", fieldId: "fldwPxYvCnIkLBxPcQH", type: "checkbox", camel: "twentyFourHourSecurity" },
     City: { id: "City", real: "City", fieldId: "fldgyInMmPEsw4knJNC", type: "link" },
     Area: { id: "Area", real: "Area", fieldId: "fldmmdNC3U5KKGB2SI3", type: "link" },
     Development: { id: "Development", real: "Development", fieldId: "fldFVvRu2QMZC5bA2Cu", type: "link" },
@@ -142,6 +148,28 @@ export const FIELDS: Record<string, Record<string, FieldMeta>> = {
     SEO_Keywords: { id: "SEO_Keywords", real: "SEO Keywords", fieldId: "fldq5QMZMOi8NVOfk79", type: "text", camel: "seoKeywords" },
     Updated: { id: "Updated", real: "Last Updated", fieldId: "fldVvOfxFOLxw7mw29I", type: "lastModifiedTime", camel: "updatedAt" },
     Created: { id: "Created", real: "Created", fieldId: "fldTFwIxg1w393UvGbK", type: "createdTime" },
+  },
+
+  Locations: {
+    __id: RECORD_FIELD,
+    Location: { id: "Location", real: "Location", fieldId: "fldnNcucaVDrNHGdCQ3", type: "text", camel: "location" },
+    Type: { id: "Type", real: "Type", fieldId: "fldRjWJcVDF911q1YD9", type: "singleSelect", camel: "type" },
+    Slug: { id: "Slug", real: "Slug", fieldId: "fldQvjIXcSafSDsD4fx", type: "text", camel: "slug" },
+    Public_Label: { id: "Public_Label", real: "Public Label", fieldId: "fldfb4g8XvT4E3QNZDW", type: "text", camel: "publicLabel" },
+    Active: { id: "Active", real: "Active", fieldId: "flduPZ6Vo7nrkkcPH03", type: "checkbox", camel: "active" },
+    Parent_Location: { id: "Parent_Location", real: "Parent Location", fieldId: "fld4A1eC3BxcIgIZ0Gf", type: "link", camel: "parentLocation" },
+  },
+
+  Property_Activity: {
+    __id: RECORD_FIELD,
+    Activity: { id: "Activity", real: "Activity", fieldId: "fld5QW0BvXYWiwG4vV4", type: "text", camel: "activity" },
+    Event_Type: { id: "Event_Type", real: "Event Type", fieldId: "fldWF2afOD5CxjcPbbh", type: "singleSelect", camel: "eventType" },
+    Source: { id: "Source", real: "Source", fieldId: "fldc4dMJXSswD0Mi01g", type: "singleSelect", camel: "source" },
+    Session_ID: { id: "Session_ID", real: "Session ID", fieldId: "fldYkIZwf5cb83X2ZiF", type: "text", camel: "sessionId" },
+    Language: { id: "Language", real: "Language", fieldId: "fldzniSWdlpaHInhq7A", type: "singleSelect", camel: "language" },
+    User: { id: "User", real: "User", fieldId: "fldchSgkq0bhjSRFtFF", type: "link", camel: "user" },
+    Property: { id: "Property", real: "Property", fieldId: "fld1lOe9O3BisdaEXa0", type: "link", camel: "property" },
+    Created: { id: "Created", real: "Created", fieldId: "fldE3vEdg6WPaYAqDO7", type: "createdTime" },
   },
 
   Property_Favorites: {

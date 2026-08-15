@@ -24,6 +24,15 @@ export interface PropertyFormData {
   interiorArea: string;
   areaUnit: string;
   publicLocation: string;
+  city: string;
+  area: string;
+  development: string;
+  petFriendly: boolean;
+  parking: boolean;
+  nearShopping: boolean;
+  nearJungle: boolean;
+  nearBeach: boolean;
+  twentyFourHourSecurity: boolean;
   seoTitleEn: string;
   seoTitleEs: string;
   seoDescriptionEn: string;
@@ -53,6 +62,15 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit }: 
     interiorArea: property?.interiorArea != null ? String(property.interiorArea) : "",
     areaUnit: property?.areaUnit ?? "m²",
     publicLocation: property?.publicLocation ?? "",
+    city: "",
+    area: "",
+    development: "",
+    petFriendly: false,
+    parking: false,
+    nearShopping: false,
+    nearJungle: false,
+    nearBeach: false,
+    twentyFourHourSecurity: false,
     seoTitleEn: property?.seoTitleEn ?? "",
     seoTitleEs: property?.seoTitleEs ?? "",
     seoDescriptionEn: property?.seoDescriptionEn ?? "",
@@ -72,7 +90,7 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit }: 
     }
   };
 
-  const update = (field: keyof PropertyFormData, value: string) =>
+  const update = <K extends keyof PropertyFormData>(field: K, value: PropertyFormData[K]) =>
     setForm((prev) => ({ ...prev, [field]: value }));
 
   return (
@@ -116,6 +134,51 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit }: 
             rows={3}
             className="w-full border rounded-md px-3 py-2 text-sm"
           />
+        </div>
+
+        <div className="grid gap-4 sm:grid-cols-3">
+          {(["city", "area", "development"] as const).map((field) => (
+            <div key={field}>
+              <label className="block text-xs font-medium text-muted-foreground mb-1">
+                {field === "city"
+                  ? t("City", "Ciudad")
+                  : field === "area"
+                    ? t("Area", "Zona")
+                    : t("Development", "Desarrollo")}
+              </label>
+              <input
+                type="text"
+                value={form[field]}
+                onChange={(e) => update(field, e.target.value)}
+                placeholder={field === "city" ? "Tulum" : field === "area" ? "Aldea Zama" : "Development name"}
+                className="w-full border rounded-md px-3 py-2 text-sm"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="border rounded-lg p-4 space-y-4">
+        <h3 className="font-medium text-sm">{t("Features", "Características")}</h3>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {([
+            ["petFriendly", "Pet friendly", "Admite mascotas"],
+            ["parking", "Parking", "Estacionamiento"],
+            ["nearShopping", "Near shopping", "Cerca de tiendas"],
+            ["nearJungle", "Near jungle", "Cerca de la selva"],
+            ["nearBeach", "Near beach", "Cerca de la playa"],
+            ["twentyFourHourSecurity", "24-hour security", "Seguridad 24 horas"],
+          ] as const).map(([field, en, es]) => (
+            <label key={field} className="flex items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={form[field]}
+                onChange={(e) => update(field, e.target.checked)}
+                className="size-4 rounded border-border text-primary"
+              />
+              {t(en, es)}
+            </label>
+          ))}
         </div>
       </div>
 

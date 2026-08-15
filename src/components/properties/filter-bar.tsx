@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Heart } from "lucide-react";
 
 interface FilterBarProps {
@@ -11,6 +12,9 @@ interface FilterBarProps {
 export default function FilterBar({ total, locale }: FilterBarProps) {
   const [listingType, setListingType] = useState<"Sale" | "Rental">("Sale");
   const [view, setView] = useState<"list" | "map" | "split">("list");
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
 
   const t = (en: string, es: string) => (locale === "es" ? es : en);
 
@@ -26,7 +30,21 @@ export default function FilterBar({ total, locale }: FilterBarProps) {
     { name: "pool", label: "Pool", es: "Piscina" },
     { name: "laundry", label: "Laundry", es: "Lavandería" },
     { name: "furnished", label: "Furnished", es: "Amueblado" },
+    { name: "petFriendly", label: "Pet friendly", es: "Admite mascotas" },
+    { name: "parking", label: "Parking", es: "Estacionamiento" },
+    { name: "nearShopping", label: "Near shopping", es: "Cerca de tiendas" },
+    { name: "nearJungle", label: "Near jungle", es: "Cerca de la selva" },
+    { name: "nearBeach", label: "Near beach", es: "Cerca de la playa" },
+    { name: "twentyFourHourSecurity", label: "24-hour security", es: "Seguridad 24 horas" },
   ];
+
+  const toggleAmenity = (name: string, checked: boolean) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (checked) params.set(name, "true");
+    else params.delete(name);
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   return (
     <div className="sticky top-16 z-30 border-b border-border bg-card shadow-sm">
@@ -182,7 +200,13 @@ export default function FilterBar({ total, locale }: FilterBarProps) {
                   key={a.name}
                   className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
                 >
-                  <input type="checkbox" name={a.name} className="size-3.5 rounded border-border text-primary focus:ring-primary/40" />
+                   <input
+                     type="checkbox"
+                     name={a.name}
+                     checked={searchParams.get(a.name) === "true"}
+                     onChange={(e) => toggleAmenity(a.name, e.target.checked)}
+                     className="size-3.5 rounded border-border text-primary focus:ring-primary/40"
+                   />
                   {t(a.label, a.es)}
                 </label>
               ))}

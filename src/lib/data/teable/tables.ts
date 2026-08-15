@@ -4,6 +4,8 @@ export const DB_TABLES = {
   Users: "tbl394RbduZlmHUni8e", // Portal Users
   Agents: "tbluaZYX8Umw7VuZHVG", // Clients (advertiser accounts)
   Properties: "tblUlJEDQW8xvlqMviu",
+  Locations: "tblRMqpDs1ilZAOacsH",
+  Property_Activity: "tblbiHm44TeA55UEWSt",
   Property_Favorites: "tbl09wm59D1Z6vnm3Yh",
   Property_Watchlists: "tbl0LyK3gP4WpYFJE9z",
 };

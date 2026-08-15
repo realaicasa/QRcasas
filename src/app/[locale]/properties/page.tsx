@@ -46,6 +46,14 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   if (typeof sp.location === "string" && sp.location.trim()) {
     filters.location = sp.location.trim();
   }
+  if (sp.wifi === "true") filters.wifi = true;
+  if (sp.elevator === "true") filters.elevator = true;
+  if (sp.petFriendly === "true") filters.petFriendly = true;
+  if (sp.parking === "true") filters.parking = true;
+  if (sp.nearShopping === "true") filters.nearShopping = true;
+  if (sp.nearJungle === "true") filters.nearJungle = true;
+  if (sp.nearBeach === "true") filters.nearBeach = true;
+  if (sp.twentyFourHourSecurity === "true") filters.twentyFourHourSecurity = true;
 
   const sort: PropertySortOption =
     sp.sort === "price_asc" || sp.sort === "price_desc" ? sp.sort : "newest";
