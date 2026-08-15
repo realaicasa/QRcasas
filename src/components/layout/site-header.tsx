@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { getCustomerAuth } from "@/lib/customer-auth";
+import { getAgentByUserId } from "@/lib/data/agents";
 import type { Locale } from "@/lib/i18n";
 
 interface SiteHeaderProps {
@@ -24,6 +25,14 @@ export default async function SiteHeader({ locale }: SiteHeaderProps) {
   const store = await cookies();
   const session = await getCustomerAuth(store.get("qrcasas_session")?.value);
   const isLoggedIn = Boolean(session);
+  let agent = null;
+  if (session) {
+    try {
+      agent = await getAgentByUserId(session.userId);
+    } catch {
+      // Keep the global header available if the optional agent lookup fails.
+    }
+  }
 
   return (
     <header className="sticky top-0 z-40 w-full border-b border-border/70 bg-background/85 backdrop-blur-md">
@@ -75,7 +84,7 @@ export default async function SiteHeader({ locale }: SiteHeaderProps) {
           {isLoggedIn ? (
             <>
               <Link
-                href={`/${locale}/account`}
+                href={agent ? `/${locale}/account/properties` : `/${locale}/account`}
                 className="inline-flex items-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-dark"
               >
                 {t("portal")}

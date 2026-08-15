@@ -14,7 +14,7 @@ export default function InstallPrompt() {
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+      navigator.serviceWorker.register("/sw.js?v=3").catch(() => undefined);
     }
 
     const onBeforeInstallPrompt = (e: Event) => {

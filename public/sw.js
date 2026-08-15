@@ -1,4 +1,4 @@
-const CACHE_NAME = "qrcasas-v2";
+const CACHE_NAME = "qrcasas-v3";
 const CORE_ASSETS = [
   "/icons/icon-192.png",
   "/icons/icon-512.png",
