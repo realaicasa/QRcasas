@@ -186,7 +186,7 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
                 </Link>
               ) : (
                 <Link
-                  href={`/${locale}/login`}
+                  href={`/${locale}/login?next=/${locale}/account/properties/new`}
                   className="flex-1 flex items-center justify-center gap-4 rounded-xl bg-primary px-10 py-6 text-lg font-bold text-primary-foreground shadow-lg transition-colors hover:bg-primary-dark w-full sm:w-auto"
                 >
                   <Tag className="size-6" />
@@ -194,7 +194,7 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
                 </Link>
               )}
               <Link
-                href={`/${locale}/login`}
+                href={`/${locale}/login?next=/${locale}/account/properties`}
                 className="flex-1 flex items-center justify-center gap-4 rounded-xl border-2 border-primary bg-transparent px-10 py-6 text-lg font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground w-full sm:w-auto"
               >
                 <Users className="size-6" />

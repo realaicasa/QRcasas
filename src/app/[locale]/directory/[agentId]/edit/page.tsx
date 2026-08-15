@@ -59,7 +59,7 @@ export default async function AgentEditPage({
   return (
     <main className="mx-auto w-full max-w-2xl px-4 py-8 sm:px-6">
       <div className="mb-6">
-        <a href={`/directory/${agent.id}`} className="text-sm text-muted-foreground hover:underline">
+        <a href={`/${locale}/directory/${agent.id}`} className="text-sm text-muted-foreground hover:underline">
           &larr; {t("Back to profile", "Volver al perfil")}
         </a>
       </div>

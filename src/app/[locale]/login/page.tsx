@@ -15,12 +15,16 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function LoginPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ next?: string }>;
 }) {
   const { locale: raw } = await params;
+  const { next } = await searchParams;
   const locale: Locale = normalizeLocale(raw);
   const { t } = getCopy(locale);
+  const destination = next?.startsWith(`/${locale}/`) ? next : `/${locale}/account`;
 
   async function handleSignIn(formData: FormData) {
     "use server";
@@ -37,7 +41,7 @@ export default async function LoginPage({
       path: "/",
       maxAge: 60 * 60 * 24 * 30,
     });
-    redirect(`/${locale}/account`);
+    redirect(destination);
   }
 
   return (

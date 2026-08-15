@@ -30,7 +30,7 @@ export default async function AgentRegisterPage({
   const session = await getCustomerAuth(cookie);
 
   if (!session) {
-    redirect(`/${locale}/login`);
+    redirect(`/${locale}/login?next=/${locale}/directory/register`);
   }
 
   // Check if user already has an agent profile
@@ -47,7 +47,7 @@ export default async function AgentRegisterPage({
       primaryContactValue: data.primaryContactValue,
       defaultLanguage: data.defaultLanguage,
     });
-    redirect(`/${locale}/directory`);
+    redirect(`/${locale}/account/properties`);
   }
 
   return (
