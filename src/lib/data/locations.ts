@@ -12,6 +12,15 @@ export interface LocationOption {
   type: LocationType;
 }
 
+const STARTER_CITIES = [
+  "Cancún",
+  "Cozumel",
+  "Isla Mujeres",
+  "Playa del Carmen",
+  "Puerto Morelos",
+  "Tulum",
+];
+
 export async function getLocationsByType(type: LocationType): Promise<LocationOption[]> {
   const client = new TeableClient(getTeableConfig());
   try {
@@ -22,7 +31,7 @@ export async function getLocationsByType(type: LocationType): Promise<LocationOp
       " AND " + qi("Active") + " IS TRUE" +
       " ORDER BY " + qi("Location") + " ASC";
     const rows = await client.runSql<SqlRow>(sql);
-    return rows
+    const locations = rows
       .map((row) => ({
         id: String(row.__id ?? ""),
         name: String(row.Location ?? ""),
@@ -30,6 +39,18 @@ export async function getLocationsByType(type: LocationType): Promise<LocationOp
       }))
       .filter((location) => location.id && location.name)
       .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (type === "City") {
+      const existingNames = new Set(locations.map((location) => location.name.toLocaleLowerCase()));
+      for (const name of STARTER_CITIES) {
+        if (!existingNames.has(name.toLocaleLowerCase())) {
+          locations.push({ id: `starter:${name}`, name, type });
+        }
+      }
+      locations.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return locations;
   } catch (error) {
     console.error(`locations lookup failed for ${type}`, error);
     return [];
