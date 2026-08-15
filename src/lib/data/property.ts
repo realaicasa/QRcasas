@@ -528,3 +528,4 @@ export async function getPublicProperties(
 
   return { properties, total };
 }
+
