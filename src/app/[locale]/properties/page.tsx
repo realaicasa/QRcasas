@@ -50,6 +50,8 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   if (!filters.location && typeof sp.city === "string" && sp.city.trim()) {
     filters.location = sp.city.trim();
   }
+  if (typeof sp.area === "string" && sp.area.trim()) filters.areaId = sp.area;
+  if (typeof sp.development === "string" && sp.development.trim()) filters.developmentId = sp.development;
   if (sp.wifi === "true") filters.wifi = true;
   if (sp.elevator === "true") filters.elevator = true;
   if (sp.pool === "true") filters.pool = true;
@@ -70,7 +72,11 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   const offset = (page - 1) * pageSize;
 
   const { properties, total } = await getPublicProperties(filters, sort, pageSize, offset);
-  const cities = await getLocationsByType("City");
+  const [cities, areas, developments] = await Promise.all([
+    getLocationsByType("City"),
+    getLocationsByType("Area"),
+    getLocationsByType("Development"),
+  ]);
   const totalPages = Math.ceil(total / pageSize);
 
   return (
@@ -96,7 +102,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
       </section>
 
       {/* Filter Bar */}
-      <FilterBar total={total} locale={locale} cities={cities} />
+      <FilterBar total={total} locale={locale} cities={cities} areas={areas} developments={developments} />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
         {/* Results map */}

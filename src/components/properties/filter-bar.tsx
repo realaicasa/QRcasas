@@ -9,9 +9,11 @@ interface FilterBarProps {
   total: number;
   locale: string;
   cities: LocationOption[];
+  areas: LocationOption[];
+  developments: LocationOption[];
 }
 
-export default function FilterBar({ total, locale, cities }: FilterBarProps) {
+export default function FilterBar({ total, locale, cities, areas, developments }: FilterBarProps) {
   const [listingType, setListingType] = useState<"Sale" | "Rental">("Sale");
   const [view, setView] = useState<"list" | "map" | "split">("list");
   const router = useRouter();
@@ -135,16 +137,18 @@ export default function FilterBar({ total, locale, cities }: FilterBarProps) {
 
           <div className="flex flex-col gap-1">
             <label className={labelClass}>{t("Area", "Zona")}</label>
-            <select name="area" defaultValue="" className={selectClass}>
-              <option value="">{t("All areas", "Todas las zonas")}</option>
-            </select>
+              <select name="area" defaultValue={searchParams.get("area") ?? ""} className={selectClass}>
+                <option value="">{t("All areas", "Todas las zonas")}</option>
+                {areas.map((area) => <option key={area.id} value={area.id}>{area.name}</option>)}
+              </select>
           </div>
 
           <div className="flex flex-col gap-1">
             <label className={labelClass}>{t("Development", "Desarrollo")}</label>
-            <select name="development" defaultValue="" className={selectClass}>
-              <option value="">{t("All developments", "Todos los desarrollos")}</option>
-            </select>
+              <select name="development" defaultValue={searchParams.get("development") ?? ""} className={selectClass}>
+                <option value="">{t("All developments", "Todos los desarrollos")}</option>
+                {developments.map((development) => <option key={development.id} value={development.id}>{development.name}</option>)}
+              </select>
           </div>
 
           <div className="flex flex-col gap-1">

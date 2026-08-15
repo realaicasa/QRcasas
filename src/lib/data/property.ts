@@ -478,6 +478,8 @@ export interface PropertyListFilters {
   maxPrice?: number;
   bedrooms?: number;
   location?: string;
+  areaId?: string;
+  developmentId?: string;
   petFriendly?: boolean;
   parking?: boolean;
   nearShopping?: boolean;
@@ -520,6 +522,8 @@ export async function getPublicProperties(
       qi("Public_Location") + " ILIKE " + lit("%" + filters.location + "%")
     );
   }
+  if (filters.areaId) whereClauses.push(qi("Area") + " = " + lit(filters.areaId));
+  if (filters.developmentId) whereClauses.push(qi("Development") + " = " + lit(filters.developmentId));
   const featureFilters: Array<[keyof PropertyListFilters, string]> = [
     ["wifi", "Wi_Fi"],
     ["elevator", "Elevator"],
