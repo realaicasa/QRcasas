@@ -313,7 +313,7 @@ class SqlParser {
     if (this.isWord("COUNT")) {
       this.next();
       this.expectPunct("(");
-      this.expectWord("*");
+      this.expectPunct("*");
       this.expectPunct(")");
       kind = "count";
       if (this.isWord("AS")) {
