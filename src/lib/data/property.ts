@@ -486,6 +486,9 @@ export interface PropertyListFilters {
   twentyFourHourSecurity?: boolean;
   wifi?: boolean;
   elevator?: boolean;
+  pool?: boolean;
+  furnished?: boolean;
+  laundry?: boolean;
 }
 
 export type PropertySortOption = "newest" | "price_asc" | "price_desc";
@@ -529,6 +532,14 @@ export async function getPublicProperties(
   ];
   for (const [filter, field] of featureFilters) {
     if (filters[filter] === true) whereClauses.push(qi(field) + " IS TRUE");
+  }
+  const selectableFeatures: Array<[keyof PropertyListFilters, string]> = [
+    ["pool", "Pool"],
+    ["furnished", "Furnished"],
+    ["laundry", "Laundry"],
+  ];
+  for (const [filter, field] of selectableFeatures) {
+    if (filters[filter] === true) whereClauses.push(qi(field) + " IS NOT NULL");
   }
 
   const where = whereClauses.join(" AND ");

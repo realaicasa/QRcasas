@@ -46,8 +46,14 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   if (typeof sp.location === "string" && sp.location.trim()) {
     filters.location = sp.location.trim();
   }
+  if (!filters.location && typeof sp.city === "string" && sp.city.trim()) {
+    filters.location = sp.city.trim();
+  }
   if (sp.wifi === "true") filters.wifi = true;
   if (sp.elevator === "true") filters.elevator = true;
+  if (sp.pool === "true") filters.pool = true;
+  if (sp.furnished === "true") filters.furnished = true;
+  if (sp.laundry === "true") filters.laundry = true;
   if (sp.petFriendly === "true") filters.petFriendly = true;
   if (sp.parking === "true") filters.parking = true;
   if (sp.nearShopping === "true") filters.nearShopping = true;

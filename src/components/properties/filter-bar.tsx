@@ -22,7 +22,6 @@ export default function FilterBar({ total, locale }: FilterBarProps) {
     "w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40";
   const labelClass = "text-xs font-semibold text-muted-foreground";
 
-  const cities = ["Tulum", "Cancún", "Playa del Carmen", "Puerto Morelos", "Isla Mujeres", "Cozumel"];
   const types = ["Apartment", "House", "Condo", "Villa", "Land", "Commercial"];
   const amenities = [
     { name: "elevator", label: "Elevator", es: "Ascensor" },
@@ -46,9 +45,21 @@ export default function FilterBar({ total, locale }: FilterBarProps) {
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const submitFilters = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const data = new FormData(event.currentTarget);
+    const params = new URLSearchParams(searchParams.toString());
+    for (const [key, value] of data.entries()) {
+      if (typeof value === "string" && value.trim()) params.set(key, value);
+      else params.delete(key);
+    }
+    params.delete("page");
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <div className="sticky top-16 z-30 border-b border-border bg-card shadow-sm">
-      <div className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6">
+      <form onSubmit={submitFilters} className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6">
         {/* Main search row */}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
           {/* Buy/Rent toggle */}
@@ -110,12 +121,13 @@ export default function FilterBar({ total, locale }: FilterBarProps) {
         <div className="mt-4 grid gap-3 rounded-xl border border-border bg-background p-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
           <div className="flex flex-col gap-1">
             <label className={labelClass}>{t("City", "Ciudad")}</label>
-            <select name="city" defaultValue="" className={selectClass}>
-              <option value="">{t("All cities", "Todas las ciudades")}</option>
-              {cities.map((c) => (
-                <option key={c} value={c}>{c}</option>
-              ))}
-            </select>
+              <input
+                type="text"
+                name="city"
+                defaultValue={searchParams.get("city") ?? ""}
+                placeholder={t("Any city", "Cualquier ciudad")}
+                className={selectClass}
+              />
           </div>
 
           <div className="flex flex-col gap-1">
@@ -249,7 +261,7 @@ export default function FilterBar({ total, locale }: FilterBarProps) {
             ))}
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }
