@@ -57,16 +57,16 @@ export default async function SiteHeader({ locale }: SiteHeaderProps) {
           </Link>
         </div>
 
-        <nav className="hidden items-center gap-2 md:flex" aria-label="Main">
+        <nav className="flex items-center gap-1 sm:gap-2" aria-label="Main">
           <Link
             href={`/${locale}/properties`}
-            className="inline-flex items-center rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary"
+            className="inline-flex items-center rounded-lg border border-border px-2 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary sm:px-4 sm:py-2 sm:text-sm"
           >
             {t("properties")}
           </Link>
           <Link
             href={`/${locale}/directory`}
-            className="inline-flex items-center rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary"
+            className="inline-flex items-center rounded-lg border border-border px-2 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary hover:bg-primary/10 hover:text-primary sm:px-4 sm:py-2 sm:text-sm"
           >
             {t("realtors")}
           </Link>

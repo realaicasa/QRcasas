@@ -182,7 +182,7 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
                   className="flex-1 flex items-center justify-center gap-4 rounded-xl bg-primary px-10 py-6 text-lg font-bold text-primary-foreground shadow-lg transition-colors hover:bg-primary-dark w-full sm:w-auto"
                 >
                   <Tag className="size-6" />
-                  <span className="hidden sm:inline-block">{t("addProperty")}</span>
+                  <span>{t("addProperty")}</span>
                 </Link>
               ) : (
                 <Link
@@ -190,7 +190,7 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
                   className="flex-1 flex items-center justify-center gap-4 rounded-xl bg-primary px-10 py-6 text-lg font-bold text-primary-foreground shadow-lg transition-colors hover:bg-primary-dark w-full sm:w-auto"
                 >
                   <Tag className="size-6" />
-                  <span className="hidden sm:inline-block">{t("addProperty")}</span>
+                  <span>{t("addProperty")}</span>
                 </Link>
               )}
               <Link
@@ -198,7 +198,7 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
                 className="flex-1 flex items-center justify-center gap-4 rounded-xl border-2 border-primary bg-transparent px-10 py-6 text-lg font-bold text-primary transition-colors hover:bg-primary hover:text-primary-foreground w-full sm:w-auto"
               >
                 <Users className="size-6" />
-                <span className="hidden sm:inline-block">{t("agentLogin")}</span>
+                <span>{t("agentLogin")}</span>
               </Link>
             </div>
           </div>
