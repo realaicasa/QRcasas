@@ -1,10 +1,10 @@
 # QRcasas Project Manifest
 
 ## Status
-- Current goal: Restore and verify the production homepage, then complete the advertiser property-listing flow.
-- Last session date: 2026-08-14.
+- Current goal: Operate the canonical Teable OTP/Google OAuth, Stripe, and lifecycle implementation safely.
+- Last session date: 2026-08-16.
 - Current branch: `main`.
-- Current commit: `d364987e`.
+- Current commit: `3b5c5ebc`.
 - Working tree: clean; `main` is pushed to `origin/main`.
 
 ## System State
@@ -19,27 +19,25 @@
 
 ## Implemented
 - Real Teable client with SQL translation, reads, writes, link helpers, and field mapping.
-- Auth, registration, login, and forgot-password routes.
+- Teable OTP and Google OAuth are authoritative for authentication.
 - Canonical advertiser routes: `/account/properties`, `/account/properties/new`, `/directory/register`.
 - Property pricing flow with 500 MXN, 3,000 MXN, and 6,900 MXN tiers.
 - Property creation, ownership-gated editing, and advertiser dashboard.
-- 13-week status calculation: active, expiring soon, and archived.
+- Canonical lifecycle fields: `Listing Starts At`, `Paid Through`, `Renewal Reminder Sent At`, `Purge Eligible At`, and `Lifecycle Status`.
+- Existing lifecycle automation is authoritative and must not be replaced with duplicate fields.
 - Prominent footer CTAs: `Add property` and `real-estate-agents`.
 - Header labels: `Properties (directory)` and `Agents (directory)`.
 - Legacy Teable URL normalization in `src/lib/request.ts`.
 
-## Known Production Issue
-- The production homepage has returned a Server Components 500 at `/en/properties`.
-- The browser `tabs:outgoing.message.ready` error is unrelated browser-extension noise.
-- The supplied legacy Teable URL is normalized by commit `d364987e` to `https://app.teable.ai/api`.
-- If the 500 remains after deployment, inspect Vercel function logs for the first server exception; do not guess from the browser digest.
+## Security Status
+- GitHub and Teable PATs previously exposed in chat are compromised and must be rotated.
+- Do not merge application-owned password hashing or password-reset code; QRcasas uses Teable OTP and Google OAuth.
+- Do not store tokens in this manifest or Git.
 
 ## Pending / Next
-- [ ] Confirm Vercel deployed commit `d364987e` from `main`.
-- [ ] Confirm `TEABLE_API_URL` is set for Production and equals `https://app.teable.ai/api` (the compatibility code also accepts the supplied legacy format).
-- [ ] Confirm `TEABLE_API_TOKEN` is set for Production without exposing it in logs.
-- [ ] Re-test `/en/properties` and `/en/login` after deployment.
-- [ ] Add a proper Enquiries table and contact-modal open tracking.
-- [ ] Implement Stripe checkout after property details are confirmed.
-- [ ] Implement week-12 renewal reminders and 12-month archive removal automation.
-- [ ] Add explicit legacy 308 redirects if still absent: `/list-property` and `/realtors/join`.
+- [ ] Rotate the GitHub PAT and Teable PAT, then update Vercel securely.
+- [ ] Configure Stripe credentials and canonical Price IDs in Vercel.
+- [ ] Verify the existing Stripe webhook and lifecycle automation in production.
+- [ ] Confirm the audited commit `e5922a2` is available in the authoritative workspace/history.
+- [ ] Do not recreate the five removed duplicate lifecycle fields.
+- [ ] Add Resend only if the existing Teable automation requires an external email provider.
