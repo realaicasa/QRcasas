@@ -65,6 +65,11 @@ function PropertyRow({ property, locale }: { property: AgentPropertyListItem; lo
           </div>
           <div className="text-xs text-muted-foreground mt-1">
             {t("Enquiries", "Consultas")}: {property.enquiryCount}
+            {property.status !== "archived" && (
+              <span className="ml-2 text-green-700">
+                · {t("Active until", "Activa hasta")} {new Date(property.listingExpiryDate).toLocaleDateString(locale === "es" ? "es-MX" : "en-US")}
+              </span>
+            )}
             {property.status === "expiring_soon" && (
               <span className="ml-2 text-yellow-600">
                 · {t("Expires", "Vence")} {new Date(property.expiryDate).toLocaleDateString(locale === "es" ? "es-MX" : "en-US")}
@@ -73,6 +78,7 @@ function PropertyRow({ property, locale }: { property: AgentPropertyListItem; lo
             {property.status === "archived" && (
               <span className="ml-2 text-gray-500">
                 · {t("Archived", "Archivada")} {new Date(property.expiryDate).toLocaleDateString(locale === "es" ? "es-MX" : "en-US")}
+                {property.archiveUntilDate && ` · ${t("Can reactivate until", "Se puede reactivar hasta")} ${new Date(property.archiveUntilDate).toLocaleDateString(locale === "es" ? "es-MX" : "en-US")}`}
               </span>
             )}
           </div>

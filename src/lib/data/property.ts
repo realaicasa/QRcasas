@@ -58,6 +58,11 @@ export interface PropertyRecord {
   seoDescriptionEs: string | null;
   seoKeywords: string | null;
   ogImageOverride: string | null;
+  listingStartDate: string | null;
+  listingExpiryDate: string | null;
+  reminderSentAt: string | null;
+  archiveUntilDate: string | null;
+  lifecycleState: string | null;
 }
 
 /** Resolve SEO title by locale with fallback chain: locale-specific > generic > title */
@@ -148,6 +153,11 @@ function parsePropertyRow(row: SqlRow): PropertyRecord {
     seoDescriptionEs: row.SEO_Description_Es != null ? String(row.SEO_Description_Es) : null,
     seoKeywords: row.SEO_Keywords != null ? String(row.SEO_Keywords) : null,
     ogImageOverride: row.OG_Image_Override != null ? String(row.OG_Image_Override) : null,
+    listingStartDate: row.Listing_Start_Date != null ? String(row.Listing_Start_Date) : null,
+    listingExpiryDate: row.Listing_Expiry_Date != null ? String(row.Listing_Expiry_Date) : null,
+    reminderSentAt: row.Reminder_Sent_At != null ? String(row.Reminder_Sent_At) : null,
+    archiveUntilDate: row.Archive_Until_Date != null ? String(row.Archive_Until_Date) : null,
+    lifecycleState: row.Lifecycle_State != null ? String(row.Lifecycle_State) : null,
   };
 }
 
@@ -277,24 +287,30 @@ export interface AgentPropertyListItem {
   expiryDate: string;
   daysUntilExpiry: number;
   enquiryCount: number;
+  listingStartDate: string;
+  listingExpiryDate: string;
+  archiveUntilDate: string | null;
+  lifecycleState: string;
 }
 
 /** Derive property status from created date (13-week lifecycle). */
-function derivePropertyStatus(createdAt: string): {
+function derivePropertyStatus(createdAt: string, explicitExpiry?: string | null, lifecycleState?: string | null): {
   status: PropertyStatus;
   expiryDate: string;
   daysUntilExpiry: number;
 } {
   const created = new Date(createdAt);
-  const expiry = new Date(created);
-  expiry.setDate(expiry.getDate() + 13 * 7); // 13 weeks
+  const expiry = explicitExpiry ? new Date(explicitExpiry) : new Date(created);
+  if (!explicitExpiry) expiry.setDate(expiry.getDate() + 13 * 7); // 13 weeks
 
   const now = new Date();
   const msUntilExpiry = expiry.getTime() - now.getTime();
   const daysUntilExpiry = Math.ceil(msUntilExpiry / (1000 * 60 * 60 * 24));
 
   let status: PropertyStatus;
-  if (daysUntilExpiry > 14) {
+  if (lifecycleState === "Archived" || lifecycleState === "Purged") {
+    status = "archived";
+  } else if (daysUntilExpiry > 14) {
     status = "active";
   } else if (daysUntilExpiry > 0) {
     status = "expiring_soon";
@@ -316,7 +332,7 @@ export async function getPropertiesByAgent(agentId: string): Promise<AgentProper
       qi("Listing_Type"), qi("Bedrooms"), qi("Bathrooms"),
       qi("Interior_Area"), qi("Area_Unit"), qi("Photos"),
       qi("Public_Location"), qi("Featured"), qi("Published"),
-      qi("Created"),
+      qi("Created"), qi("Listing_Start_Date"), qi("Listing_Expiry_Date"), qi("Archive_Until_Date"), qi("Lifecycle_State"),
     ].join(", ") +
     " FROM " + qiTable(DB_TABLES.Properties) +
     " WHERE " + qi("Client") + " = " + lit(agentId) +
@@ -335,7 +351,11 @@ export async function getPropertiesByAgent(agentId: string): Promise<AgentProper
       : [];
 
     const createdAt = row.Created != null ? String(row.Created) : new Date().toISOString();
-    const { status, expiryDate, daysUntilExpiry } = derivePropertyStatus(createdAt);
+    const listingStartDate = row.Listing_Start_Date != null ? String(row.Listing_Start_Date) : createdAt;
+    const listingExpiryDate = row.Listing_Expiry_Date != null ? String(row.Listing_Expiry_Date) : null;
+    const archiveUntilDate = row.Archive_Until_Date != null ? String(row.Archive_Until_Date) : null;
+    const lifecycleState = row.Lifecycle_State != null ? String(row.Lifecycle_State) : "Active";
+    const { status, expiryDate, daysUntilExpiry } = derivePropertyStatus(listingStartDate, listingExpiryDate, lifecycleState);
 
     return {
       id: String(row.__id ?? ""),
@@ -357,6 +377,10 @@ export async function getPropertiesByAgent(agentId: string): Promise<AgentProper
       expiryDate,
       daysUntilExpiry,
       enquiryCount: await countContactDetailsOpens(String(row.__id ?? "")),
+      listingStartDate,
+      listingExpiryDate: expiryDate,
+      archiveUntilDate,
+      lifecycleState,
     };
   }));
 }
@@ -434,6 +458,9 @@ export async function createProperty(
     Furnished: data.furnished || "Unfurnished",
     Laundry: data.laundry || "None",
     Public_Slug: slugify(data.title),
+    Listing_Start_Date: now.toISOString(),
+    Listing_Expiry_Date: expiry.toISOString(),
+    Lifecycle_State: "Draft",
     Client: agentId,
     Published: false,
     SEO_Title_En: data.seoTitleEn || null,
