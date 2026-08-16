@@ -153,11 +153,11 @@ function parsePropertyRow(row: SqlRow): PropertyRecord {
     seoDescriptionEs: row.SEO_Description_Es != null ? String(row.SEO_Description_Es) : null,
     seoKeywords: row.SEO_Keywords != null ? String(row.SEO_Keywords) : null,
     ogImageOverride: row.OG_Image_Override != null ? String(row.OG_Image_Override) : null,
-    listingStartDate: row.Listing_Start_Date != null ? String(row.Listing_Start_Date) : null,
-    listingExpiryDate: row.Listing_Expiry_Date != null ? String(row.Listing_Expiry_Date) : null,
-    reminderSentAt: row.Reminder_Sent_At != null ? String(row.Reminder_Sent_At) : null,
-    archiveUntilDate: row.Archive_Until_Date != null ? String(row.Archive_Until_Date) : null,
-    lifecycleState: row.Lifecycle_State != null ? String(row.Lifecycle_State) : null,
+    listingStartDate: row.Listing_Starts_At != null ? String(row.Listing_Starts_At) : null,
+    listingExpiryDate: row.Paid_Through != null ? String(row.Paid_Through) : null,
+    reminderSentAt: row.Renewal_Reminder_Sent_At != null ? String(row.Renewal_Reminder_Sent_At) : null,
+    archiveUntilDate: row.Purge_Eligible_At != null ? String(row.Purge_Eligible_At) : null,
+    lifecycleState: row.Lifecycle_Status != null ? String(row.Lifecycle_Status) : null,
   };
 }
 
@@ -332,7 +332,7 @@ export async function getPropertiesByAgent(agentId: string): Promise<AgentProper
       qi("Listing_Type"), qi("Bedrooms"), qi("Bathrooms"),
       qi("Interior_Area"), qi("Area_Unit"), qi("Photos"),
       qi("Public_Location"), qi("Featured"), qi("Published"),
-      qi("Created"), qi("Listing_Start_Date"), qi("Listing_Expiry_Date"), qi("Archive_Until_Date"), qi("Lifecycle_State"),
+      qi("Created"), qi("Listing_Starts_At"), qi("Paid_Through"), qi("Purge_Eligible_At"), qi("Lifecycle_Status"),
     ].join(", ") +
     " FROM " + qiTable(DB_TABLES.Properties) +
     " WHERE " + qi("Client") + " = " + lit(agentId) +
@@ -351,10 +351,10 @@ export async function getPropertiesByAgent(agentId: string): Promise<AgentProper
       : [];
 
     const createdAt = row.Created != null ? String(row.Created) : new Date().toISOString();
-    const listingStartDate = row.Listing_Start_Date != null ? String(row.Listing_Start_Date) : createdAt;
-    const listingExpiryDate = row.Listing_Expiry_Date != null ? String(row.Listing_Expiry_Date) : null;
-    const archiveUntilDate = row.Archive_Until_Date != null ? String(row.Archive_Until_Date) : null;
-    const lifecycleState = row.Lifecycle_State != null ? String(row.Lifecycle_State) : "Active";
+    const listingStartDate = row.Listing_Starts_At != null ? String(row.Listing_Starts_At) : createdAt;
+    const listingExpiryDate = row.Paid_Through != null ? String(row.Paid_Through) : null;
+    const archiveUntilDate = row.Purge_Eligible_At != null ? String(row.Purge_Eligible_At) : null;
+    const lifecycleState = row.Lifecycle_Status != null ? String(row.Lifecycle_Status) : "Active";
     const { status, expiryDate, daysUntilExpiry } = derivePropertyStatus(listingStartDate, listingExpiryDate, lifecycleState);
 
     return {
@@ -458,9 +458,9 @@ export async function createProperty(
     Furnished: data.furnished || "Unfurnished",
     Laundry: data.laundry || "None",
     Public_Slug: slugify(data.title),
-    Listing_Start_Date: now.toISOString(),
-    Listing_Expiry_Date: expiry.toISOString(),
-    Lifecycle_State: "Draft",
+    Listing_Starts_At: now.toISOString(),
+    Paid_Through: expiry.toISOString(),
+    Lifecycle_Status: "Draft",
     Client: agentId,
     Published: false,
     SEO_Title_En: data.seoTitleEn || null,
