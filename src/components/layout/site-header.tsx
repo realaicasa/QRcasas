@@ -38,18 +38,17 @@ export default async function SiteHeader({ locale }: SiteHeaderProps) {
     <header className="sticky top-0 z-40 w-full border-b border-border/70 bg-background/85 backdrop-blur-md">
       <div className="mx-auto flex min-h-16 w-full max-w-7xl flex-wrap items-center justify-between gap-2 px-4 py-2 sm:gap-4 sm:px-6 sm:py-0">
         <div className="order-1 flex min-w-0 items-center gap-2 sm:gap-3">
-          <Link
+<Link
             href={`/${locale}/properties`}
             className="flex items-center gap-2.5"
             aria-label="QRcasas"
           >
-            <span className="flex size-9 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-teal-500 text-base font-bold text-white shadow-sm">
-              Q
-            </span>
+            <img
+              src="https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9f1e423633f891a35.png"
+              alt="QRcasas"
+              className="h-9 w-auto rounded"
+            />
             <span className="leading-tight">
-              <span className="block text-base font-bold tracking-tight text-foreground">
-                QRcasas
-              </span>
               <span className="hidden text-[11px] text-muted-foreground sm:block">
                 {t("tagline")}
               </span>

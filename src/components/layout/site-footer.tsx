@@ -208,9 +208,11 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center text-sm text-muted-foreground">
             <div className="flex items-center gap-2">
-              <span className="flex size-7 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-600 to-teal-500 text-xs font-bold text-white">
-                Q
-              </span>
+              <img
+                src="https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9f1e423633f891a35.png"
+                alt="QRcasas"
+                className="h-7 w-auto rounded"
+              />
               <span className="font-medium text-foreground">QRcasas</span>
             </div>
             <nav className="flex flex-wrap items-center justify-center gap-4" aria-label="Footer legal">

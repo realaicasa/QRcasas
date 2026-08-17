@@ -14,16 +14,16 @@ export default function manifest(): MetadataRoute.Manifest {
     theme_color: "#0e7490",
     categories: ["real_estate", "shopping", "business"],
     icons: [
-      { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
-      { src: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+      { src: "https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9270e1f545777782d.png", sizes: "192x192", type: "image/png" },
+      { src: "https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9b9deff193c5bd67.png", sizes: "512x512", type: "image/png" },
       {
-        src: "/icons/icon-maskable-192.png",
+        src: "https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9270e1f545777782d.png",
         sizes: "192x192",
         type: "image/png",
         purpose: "maskable",
       },
       {
-        src: "/icons/icon-maskable-512.png",
+        src: "https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9b9deff193c5bd67.png",
         sizes: "512x512",
         type: "image/png",
         purpose: "maskable",
@@ -34,7 +34,7 @@ export default function manifest(): MetadataRoute.Manifest {
         name: "Browse properties",
         short_name: "Properties",
         url: "/en/properties",
-        icons: [{ src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+        icons: [{ src: "https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9270e1f545777782d.png", sizes: "192x192", type: "image/png" }],
       },
       {
         name: "Find a realtor",

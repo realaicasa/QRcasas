@@ -11,9 +11,9 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
   applicationName: "QRcasas",
   icons: {
-    icon: "/icons/icon-192.png",
-    shortcut: "/favicon.ico",
-    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
+    icon: "https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9270e1f545777782d.png",
+    shortcut: "https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9fe4291bd10e988f0.png",
+    apple: [{ url: "https://assets.cdn.filesafe.space/oeYXQCzN3HPGG5vykVUG/media/6a837df9270e1f545777782d.png", sizes: "180x180", type: "image/png" }],
   },
   appleWebApp: {
     capable: true,

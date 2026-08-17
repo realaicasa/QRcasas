@@ -8,6 +8,7 @@ export const DB_TABLES = {
   Property_Activity: "tblbiHm44TeA55UEWSt",
   Property_Favorites: "tbl09wm59D1Z6vnm3Yh",
   Property_Watchlists: "tbl0LyK3gP4WpYFJE9z",
+  ListingRenewals: "tbl7XnhLXWvbRJXXh6L",
 };
 
 export const TABLES = DB_TABLES;
