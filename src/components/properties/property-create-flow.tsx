@@ -47,14 +47,34 @@ export default function PropertyCreateFlow({
     if (selectedTier) {
       const propertyId = await onSubmit(data, selectedTier);
       if (propertyId) {
-        for (const photo of photos) {
+        if (photos.length > 0) {
           const formData = new FormData();
           formData.append("recordId", propertyId);
           formData.append("fieldId", "flddQnBjD5EOywUaeOe");
-          formData.append("file", photo.file);
-          formData.append("altText", photo.altText);
-          const response = await fetch("/api/uploads/attachment", { method: "POST", body: formData });
-          if (!response.ok) throw new Error("Photo upload failed");
+          formData.append("file", photos[0].file);
+          formData.append("altText", photos[0].altText);
+          await fetch("/api/uploads/attachment", { method: "POST", body: formData });
+        }
+
+        try {
+          const checkoutResponse = await fetch("/api/stripe/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              packageTier: selectedTier.id,
+              propertyIds: [propertyId],
+              photoUpgradePropertyIds: data.photoUpgradeRequested ? [propertyId] : [],
+            }),
+          });
+          if (checkoutResponse.ok) {
+            const { url } = await checkoutResponse.json();
+            if (url) {
+              window.location.href = url;
+              return;
+            }
+          }
+        } catch {
+          // Fall through to dashboard if checkout fails
         }
         router.push(`/${locale}/account/properties`);
       }

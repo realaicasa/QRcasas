@@ -5,6 +5,7 @@ import { cookies } from "next/headers";
 import { getCustomerAuth } from "@/lib/customer-auth";
 import { getAgentByUserId } from "@/lib/data/agents";
 import { getPropertiesByAgent, type AgentPropertyListItem } from "@/lib/data/property";
+import { getRenewalByStripeSessionId } from "@/lib/data/renewals";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -103,12 +104,15 @@ function PropertyRow({ property, locale }: { property: AgentPropertyListItem; lo
 
 export default async function AccountPropertiesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams: Promise<{ paid?: string; session_id?: string; canceled?: string }>;
 }) {
   const { locale: raw } = await params;
   const locale: Locale = normalizeLocale(raw);
   const { t } = getCopy(locale);
+  const sp = await searchParams;
 
   const store = await cookies();
   const cookie = store.get("qrcasas_session")?.value;
@@ -121,6 +125,16 @@ export default async function AccountPropertiesPage({
   const agent = await getAgentByUserId(session.userId);
   if (!agent) {
     redirect(`/${locale}/directory/register`);
+  }
+
+  let paymentBanner: { type: "verified" | "verifying" | "cancelled"; } | null = null;
+  if (sp.canceled === "1") {
+    paymentBanner = { type: "cancelled" };
+  } else if (sp.paid === "1" && sp.session_id) {
+    const renewal = await getRenewalByStripeSessionId(sp.session_id);
+    if (renewal) {
+      paymentBanner = renewal.status === "Paid" ? { type: "verified" } : { type: "verifying" };
+    }
   }
 
   const properties = await getPropertiesByAgent(agent.id);
@@ -155,6 +169,31 @@ export default async function AccountPropertiesPage({
           </Link>
         </div>
       </div>
+
+      {paymentBanner && (
+        <div
+          className={`mb-6 rounded-lg border p-4 text-sm ${
+            paymentBanner.type === "verified"
+              ? "border-green-200 bg-green-50 text-green-900"
+              : paymentBanner.type === "verifying"
+                ? "border-yellow-200 bg-yellow-50 text-yellow-900"
+                : "border-gray-200 bg-gray-50 text-gray-700"
+          }`}
+        >
+          {paymentBanner.type === "verified" &&
+            (locale === "es"
+              ? "Pago verificado. Tu anuncio está activo."
+              : "Payment verified. Your listing is now active.")}
+          {paymentBanner.type === "verifying" &&
+            (locale === "es"
+              ? "Estamos verificando tu pago. Tu anuncio se activará en breve."
+              : "We are verifying your payment. Your listing will be active shortly.")}
+          {paymentBanner.type === "cancelled" &&
+            (locale === "es"
+              ? "Pago cancelado. No se aplicaron cargos ni se activó ningún anuncio."
+              : "Checkout cancelled. No charges were applied and no listing was activated.")}
+        </div>
+      )}
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-4 mb-6">
