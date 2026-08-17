@@ -17,3 +17,9 @@
 
 ## PR / Deployment Check
 "Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Inspect git status, git diff, git log --oneline -10, and origin tracking. Run pnpm typecheck, pnpm test, and pnpm build. Push only the intended changes to main and report the commit hash."
+
+## Stripe / Resend Configuration
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Do not recreate lifecycle fields or replace Teable OTP/Google OAuth. Add only the supplied Stripe credentials and canonical Price IDs, verify the existing webhook configuration, configure Resend only where the canonical automation requires it, run production checks, and report the deployment commit."
+
+## Security Rotation
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Rotate the exposed GitHub and Teable PATs, update Vercel Production variables without printing secrets, verify the deployed commit, and confirm the working tree is clean."

@@ -4,7 +4,7 @@
 - Current goal: Operate the canonical Teable OTP/Google OAuth, Stripe, and lifecycle implementation safely.
 - Last session date: 2026-08-16.
 - Current branch: `main`.
-- Current commit: `3b5c5ebc`.
+- Current commit: `83315658`.
 - Working tree: clean; `main` is pushed to `origin/main`.
 
 ## System State
@@ -25,6 +25,7 @@
 - Property creation, ownership-gated editing, and advertiser dashboard.
 - Canonical lifecycle fields: `Listing Starts At`, `Paid Through`, `Renewal Reminder Sent At`, `Purge Eligible At`, and `Lifecycle Status`.
 - Existing lifecycle automation is authoritative and must not be replaced with duplicate fields.
+- Teable audit reference: `e5922a2` (not present in this checkout's local history).
 - Prominent footer CTAs: `Add property` and `real-estate-agents`.
 - Header labels: `Properties (directory)` and `Agents (directory)`.
 - Legacy Teable URL normalization in `src/lib/request.ts`.
@@ -37,7 +38,7 @@
 ## Pending / Next
 - [ ] Rotate the GitHub PAT and Teable PAT, then update Vercel securely.
 - [ ] Configure Stripe credentials and canonical Price IDs in Vercel.
+- [ ] Configure Resend only if the canonical Teable automation requires it.
 - [ ] Verify the existing Stripe webhook and lifecycle automation in production.
 - [ ] Confirm the audited commit `e5922a2` is available in the authoritative workspace/history.
 - [ ] Do not recreate the five removed duplicate lifecycle fields.
-- [ ] Add Resend only if the existing Teable automation requires an external email provider.
