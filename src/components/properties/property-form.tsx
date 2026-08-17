@@ -33,6 +33,8 @@ export interface PropertyFormData {
   city: string;
   area: string;
   development: string;
+  latitude: string;
+  longitude: string;
   wifi: boolean;
   elevator: boolean;
   pool: string;
@@ -58,6 +60,7 @@ const AREA_UNITS = ["m²", "sq ft"];
 const POOL_OPTIONS = ["Private", "Shared", "None"];
 const FURNISHED_OPTIONS = ["Furnished", "Part furnished", "Unfurnished"];
 const LAUNDRY_OPTIONS = ["In unit", "Hookups", "Shared", "None"];
+const BEDROOM_OPTIONS = ["Studio", "1", "2", "3", "4", "5", "6", "7+"];
 
 export default function PropertyForm({ locale, property, tierLevel, onSubmit, locations }: PropertyFormProps) {
   const t = (en: string, es: string) => (locale === "es" ? es : en);
@@ -80,6 +83,8 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
     city: "",
     area: "",
     development: "",
+    latitude: property?.latitude != null ? String(property.latitude) : "",
+    longitude: property?.longitude != null ? String(property.longitude) : "",
     wifi: property?.wifi ?? false,
     elevator: property?.elevator ?? false,
     pool: property?.pool ?? "None",
@@ -195,6 +200,13 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
             </div>
             );
           })}
+        </div>
+        <p className="text-xs text-muted-foreground">
+          {t("Optional: add coordinates to place this property on the map.", "Opcional: agrega coordenadas para colocar esta propiedad en el mapa.")}
+        </p>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <input type="number" step="any" value={form.latitude} onChange={(e) => update("latitude", e.target.value)} placeholder={t("Latitude", "Latitud")} className="w-full border rounded-md px-3 py-2 text-sm" />
+          <input type="number" step="any" value={form.longitude} onChange={(e) => update("longitude", e.target.value)} placeholder={t("Longitude", "Longitud")} className="w-full border rounded-md px-3 py-2 text-sm" />
         </div>
       </div>
 
@@ -315,13 +327,10 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
             <label className="block text-xs font-medium text-muted-foreground mb-1">
               {t("Bedrooms", "Dormitorios")}
             </label>
-            <input
-              type="number"
-              min="0"
-              value={form.bedrooms}
-              onChange={(e) => update("bedrooms", e.target.value)}
-              className="w-full border rounded-md px-3 py-2 text-sm"
-            />
+            <select value={form.bedrooms} onChange={(e) => update("bedrooms", e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm">
+              <option value="">{t("Select", "Selecciona")}</option>
+              {BEDROOM_OPTIONS.map((option) => <option key={option} value={option}>{option === "Studio" ? t("Studio", "Estudio") : option}</option>)}
+            </select>
           </div>
           <div>
             <label className="block text-xs font-medium text-muted-foreground mb-1">
@@ -363,13 +372,13 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
 
         <div>
           <label className="block text-xs font-medium text-muted-foreground mb-1">
-            {t("Public Location", "Ubicación Pública")}
+             {t("Public address or landmark", "Dirección pública o referencia")}
           </label>
           <input
             type="text"
             value={form.publicLocation}
             onChange={(e) => update("publicLocation", e.target.value)}
-            placeholder="Aldea Zama, Tulum"
+             placeholder={t("Street, building, or public landmark", "Calle, edificio o referencia pública")}
             className="w-full border rounded-md px-3 py-2 text-sm"
           />
         </div>

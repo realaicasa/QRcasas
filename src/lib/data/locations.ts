@@ -13,7 +13,7 @@ export interface LocationOption {
 }
 
 const STARTER_CITIES = [
-  "Cancún",
+  "Cancun",
   "Cozumel",
   "Isla Mujeres",
   "Playa del Carmen",

@@ -45,7 +45,8 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
     filters.bedrooms = Number(sp.bedrooms);
   }
   if (typeof sp.location === "string" && sp.location.trim()) {
-    filters.location = sp.location.trim();
+    const query = sp.location.trim();
+    filters.location = query.toLowerCase() === "pdc" ? "Playa del Carmen" : query;
   }
   if (!filters.location && typeof sp.city === "string" && sp.city.trim()) {
     filters.location = sp.city.trim();
@@ -66,6 +67,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
 
   const sort: PropertySortOption =
     sp.sort === "price_asc" || sp.sort === "price_desc" ? sp.sort : "newest";
+  const view = sp.view === "map" || sp.view === "split" ? sp.view : "list";
 
   const page = Math.max(1, Number(sp.page) || 1);
   const pageSize = 24;
@@ -106,15 +108,15 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
 
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
         {/* Results map */}
-        <div className="mb-8">
+        {view !== "list" && <div className="mb-8">
           <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
             {t("Results map", "Mapa de resultados")}
           </h2>
           <MapView properties={properties} locale={locale} />
-        </div>
+        </div>}
 
         {/* Property grid */}
-        {properties.length === 0 ? (
+        {view !== "map" && (properties.length === 0 ? (
           <div className="rounded-xl border border-dashed border-border bg-card/60 py-20 text-center">
             <p className="text-lg font-semibold mb-2">
               {t(
@@ -135,7 +137,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
               <PropertyCard key={property.id} property={property} locale={locale} t={t} />
             ))}
           </div>
-        )}
+        ))}
 
         {/* Pagination */}
         {totalPages > 1 && (

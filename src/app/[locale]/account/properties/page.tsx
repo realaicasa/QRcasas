@@ -128,18 +128,32 @@ export default async function AccountPropertiesPage({
   const archivedCount = properties.filter((p) => p.status === "archived").length;
   const totalEnquiries = properties.reduce((sum, p) => sum + p.enquiryCount, 0);
 
+  async function handleLogout() {
+    "use server";
+    const logoutStore = await cookies();
+    logoutStore.delete("qrcasas_session");
+    redirect(`/${locale}/login`);
+  }
+
   return (
     <main className="mx-auto w-full max-w-4xl px-4 py-8 sm:px-6">
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold tracking-tight">
           {t("My Properties", "Mis Propiedades")}
         </h1>
-        <Link
-          href={`/${locale}/account/properties/new`}
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90"
-        >
-          {t("Add Property", "Agregar Propiedad")}
-        </Link>
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Link href={`/${locale}/directory/${agent.id}/edit`} className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted">
+            {t("Edit profile", "Editar perfil")}
+          </Link>
+          <form action={handleLogout}>
+            <button type="submit" className="rounded-md border border-border px-4 py-2 text-sm font-medium hover:bg-muted">
+              {t("Log out", "Cerrar sesión")}
+            </button>
+          </form>
+          <Link href={`/${locale}/account/properties/new`} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
+            {t("Add Property", "Agregar Propiedad")}
+          </Link>
+        </div>
       </div>
 
       {/* Stats */}

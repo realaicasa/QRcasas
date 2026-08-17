@@ -61,6 +61,12 @@ export default function FilterBar({ total, locale, cities, areas, developments }
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const setViewMode = (nextView: "list" | "map" | "split") => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("view", nextView);
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   return (
     <div className="sticky top-16 z-30 border-b border-border bg-card shadow-sm">
       <form onSubmit={submitFilters} className="mx-auto w-full max-w-7xl px-4 py-4 sm:px-6">
@@ -165,9 +171,11 @@ export default function FilterBar({ total, locale, cities, areas, developments }
             <label className={labelClass}>{t("Bedrooms", "Dormitorios")}</label>
             <select name="bedrooms" defaultValue="" className={selectClass}>
               <option value="">{t("Any", "Cualquiera")}</option>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>{n}+</option>
-              ))}
+               <option value="0">{t("Studio", "Estudio")}</option>
+               {[1, 2, 3, 4, 5, 6].map((n) => (
+                 <option key={n} value={n}>{n}+</option>
+               ))}
+               <option value="7">7+</option>
             </select>
           </div>
 
@@ -256,7 +264,7 @@ export default function FilterBar({ total, locale, cities, areas, developments }
               <button
                 key={v.value}
                 type="button"
-                onClick={() => setView(v.value as typeof view)}
+                onClick={() => { setView(v.value as typeof view); setViewMode(v.value as typeof view); }}
                 className={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                   view === v.value
                     ? "bg-background text-foreground shadow-sm"

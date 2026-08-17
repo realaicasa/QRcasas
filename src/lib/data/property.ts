@@ -404,6 +404,8 @@ export async function createProperty(
     city?: string;
     area?: string;
     development?: string;
+    latitude?: number;
+    longitude?: number;
     wifi?: boolean;
     elevator?: boolean;
     pool?: string;
@@ -443,6 +445,8 @@ export async function createProperty(
     Interior_Area: data.interiorArea ?? null,
     Area_Unit: data.areaUnit || null,
     Public_Location: data.publicLocation || null,
+    Latitude: data.latitude ?? null,
+    Longitude: data.longitude ?? null,
     City: cityId ? [{ id: cityId }] : null,
     Area: areaId ? [{ id: areaId }] : null,
     Development: developmentId ? [{ id: developmentId }] : null,
