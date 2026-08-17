@@ -30,6 +30,7 @@ export interface PropertyRecord {
   interiorArea: number | null;
   areaUnit: string | null;
   photos: { url?: string; signedUrl?: string }[];
+  photoAltText: string[];
   publicLocation: string | null;
   petFriendly: boolean;
   parking: boolean;
@@ -94,6 +95,11 @@ export interface PropertyPageResult {
 }
 
 function parsePropertyRow(row: SqlRow): PropertyRecord {
+  let photoAltText: string[] = [];
+  try {
+    const parsed = JSON.parse(String(row.Photo_Alt_Text ?? "[]"));
+    if (Array.isArray(parsed)) photoAltText = parsed.map(String);
+  } catch { photoAltText = []; }
   const photos = Array.isArray(row.Photos)
     ? (row.Photos as unknown[])
         .filter((a): a is Record<string, unknown> => typeof a === "object" && a != null)
@@ -125,6 +131,7 @@ function parsePropertyRow(row: SqlRow): PropertyRecord {
     interiorArea: row.Interior_Area != null ? Number(row.Interior_Area) : null,
     areaUnit: row.Area_Unit != null ? String(row.Area_Unit) : null,
     photos,
+    photoAltText,
     publicLocation: row.Public_Location != null ? String(row.Public_Location) : null,
     petFriendly: row.Pet_Friendly === true,
     parking: row.Parking === true,
@@ -189,6 +196,7 @@ export async function getPublicPropertyBySlug(slug: string): Promise<PropertyPag
       qi("Description"), qi("Key_Features"), qi("Price"), qi("Currency"),
       qi("Listing_Type"), qi("Listing_Term"), qi("Bedrooms"), qi("Bathrooms"),
       qi("Interior_Area"), qi("Area_Unit"), qi("Photos"), qi("Public_Location"),
+      qi("Photo_Alt_Text"),
       qi("Latitude"), qi("Longitude"), qi("Featured"), qi("Verified"),
       qi("Wi_Fi"), qi("Elevator"), qi("Pool"), qi("Furnished"), qi("Laundry"),
       qi("City"), qi("Area"), qi("Development"),
@@ -237,6 +245,7 @@ export async function getPropertyById(propertyId: string): Promise<PropertyRecor
       qi("Description"), qi("Key_Features"), qi("Price"), qi("Currency"),
       qi("Listing_Type"), qi("Listing_Term"), qi("Bedrooms"), qi("Bathrooms"),
       qi("Interior_Area"), qi("Area_Unit"), qi("Photos"), qi("Public_Location"),
+      qi("Photo_Alt_Text"),
       qi("Latitude"), qi("Longitude"), qi("Featured"), qi("Verified"),
       qi("Wi_Fi"), qi("Elevator"), qi("Pool"), qi("Furnished"), qi("Laundry"),
       qi("City"), qi("Area"), qi("Development"),
@@ -417,6 +426,7 @@ export async function createProperty(
     nearJungle?: boolean;
     nearBeach?: boolean;
     twentyFourHourSecurity?: boolean;
+    photoUpgradeRequested?: boolean;
     seoTitleEn?: string;
     seoTitleEs?: string;
     seoDescriptionEn?: string;
@@ -465,6 +475,7 @@ export async function createProperty(
     Listing_Starts_At: now.toISOString(),
     Paid_Through: expiry.toISOString(),
     Lifecycle_Status: "Draft",
+    Photo_Package: data.photoUpgradeRequested ? "Pending Payment" : "Standard",
     Client: agentId,
     Published: false,
     SEO_Title_En: data.seoTitleEn || null,
@@ -500,6 +511,7 @@ export interface PropertyListItem {
   interiorArea: number | null;
   areaUnit: string | null;
   photos: { url?: string; signedUrl?: string }[];
+  photoAltText: string[];
   publicLocation: string | null;
   petFriendly: boolean;
   parking: boolean;
@@ -620,7 +632,7 @@ export async function getPublicProperties(
   const rows = await client.runSql<SqlRow>(listSql);
 
   const properties: PropertyListItem[] = rows.map((row) => {
-    const photos = Array.isArray(row.Photos)
+      const photos = Array.isArray(row.Photos)
       ? (row.Photos as unknown[])
           .filter((a): a is Record<string, unknown> => typeof a === "object" && a != null)
           .map((a) => ({
@@ -628,6 +640,11 @@ export async function getPublicProperties(
             signedUrl: typeof a.signedUrl === "string" ? a.signedUrl : undefined,
           }))
       : [];
+    let photoAltText: string[] = [];
+    try {
+      const parsed = JSON.parse(String(row.Photo_Alt_Text ?? "[]"));
+      if (Array.isArray(parsed)) photoAltText = parsed.map(String);
+    } catch { photoAltText = []; }
 
     return {
       id: String(row.__id ?? ""),
@@ -641,6 +658,7 @@ export async function getPublicProperties(
       interiorArea: row.Interior_Area != null ? Number(row.Interior_Area) : null,
       areaUnit: row.Area_Unit != null ? String(row.Area_Unit) : null,
       photos,
+      photoAltText,
       publicLocation: row.Public_Location != null ? String(row.Public_Location) : null,
       petFriendly: row.Pet_Friendly === true,
       parking: row.Parking === true,

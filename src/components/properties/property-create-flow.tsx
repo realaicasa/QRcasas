@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import PricingModal from "@/components/pricing/pricing-modal";
 import PropertyForm from "@/components/properties/property-form";
 import type { PricingTier } from "@/components/pricing/pricing-modal";
-import type { PropertyFormData } from "@/components/properties/property-form";
+import type { PropertyFormData, PropertyPhotoDraft } from "@/components/properties/property-form";
 import type { Locale } from "@/lib/i18n";
 import type { LocationOption } from "@/lib/data/locations";
 
@@ -13,7 +13,7 @@ interface PropertyCreateFlowProps {
   locale: Locale;
   tierLevel: string;
   agentId: string;
-  onSubmit: (data: PropertyFormData, tier: PricingTier) => void | Promise<void>;
+  onSubmit: (data: PropertyFormData, tier: PricingTier) => string | void | Promise<string | void>;
   locations: { city: LocationOption[]; area: LocationOption[]; development: LocationOption[] };
 }
 
@@ -27,6 +27,7 @@ export default function PropertyCreateFlow({
   const router = useRouter();
   const [selectedTier, setSelectedTier] = useState<PricingTier | null>(null);
   const [showPricing, setShowPricing] = useState(true);
+  const [photos, setPhotos] = useState<PropertyPhotoDraft[]>([]);
 
   const handleTierSelect = (tier: PricingTier) => {
     setSelectedTier(tier);
@@ -44,7 +45,19 @@ export default function PropertyCreateFlow({
 
   const handleSubmit = async (data: PropertyFormData) => {
     if (selectedTier) {
-      await onSubmit(data, selectedTier);
+      const propertyId = await onSubmit(data, selectedTier);
+      if (propertyId) {
+        for (const photo of photos) {
+          const formData = new FormData();
+          formData.append("recordId", propertyId);
+          formData.append("fieldId", "flddQnBjD5EOywUaeOe");
+          formData.append("file", photo.file);
+          formData.append("altText", photo.altText);
+          const response = await fetch("/api/uploads/attachment", { method: "POST", body: formData });
+          if (!response.ok) throw new Error("Photo upload failed");
+        }
+        router.push(`/${locale}/account/properties`);
+      }
     }
   };
 
@@ -90,6 +103,7 @@ export default function PropertyCreateFlow({
         locale={locale}
         tierLevel={tierLevel}
         locations={locations}
+        onPhotosChange={setPhotos}
         onSubmit={handleSubmit}
       />
     </div>

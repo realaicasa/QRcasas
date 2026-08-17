@@ -27,6 +27,7 @@ export interface AgentProfile {
   primaryContactValue: string;
   defaultLanguage: "en" | "es";
   logoImage: { url?: string; signedUrl?: string } | null;
+  profilePhoto: { url?: string; signedUrl?: string } | null;
   bioDescription: string | null;
   socialInstagram: string | null;
   socialFacebook: string | null;
@@ -87,6 +88,12 @@ function parseAgentProfile(row: SqlRow): AgentProfile {
     primaryContactValue: String(row.Primary_Contact_Value ?? ""),
     defaultLanguage: (row.Default_Language as "en" | "es") ?? "es",
     logoImage,
+    profilePhoto: row.Profile_Photo && typeof row.Profile_Photo === "object"
+      ? {
+          url: typeof (row.Profile_Photo as Record<string, unknown>).url === "string" ? String((row.Profile_Photo as Record<string, unknown>).url) : undefined,
+          signedUrl: typeof (row.Profile_Photo as Record<string, unknown>).signedUrl === "string" ? String((row.Profile_Photo as Record<string, unknown>).signedUrl) : undefined,
+        }
+      : null,
     bioDescription: row.Bio_Description != null ? String(row.Bio_Description) : null,
     socialInstagram: row.Social_Instagram != null ? String(row.Social_Instagram) : null,
     socialFacebook: row.Social_Facebook != null ? String(row.Social_Facebook) : null,
@@ -141,6 +148,7 @@ export async function getAgentById(agentId: string): Promise<AgentProfile | null
       qi("Primary_Contact_Value"),
       qi("Default_Language"),
       qi("Logo_Image"),
+      qi("Profile_Photo"),
       qi("Bio_Description"),
       qi("Social_Instagram"),
       qi("Social_Facebook"),
@@ -213,6 +221,7 @@ export async function getAgentByUserId(userId: string): Promise<AgentProfile | n
       qi("Primary_Contact_Value"),
       qi("Default_Language"),
       qi("Logo_Image"),
+      qi("Profile_Photo"),
       qi("Bio_Description"),
       qi("Social_Instagram"),
       qi("Social_Facebook"),

@@ -52,7 +52,7 @@ export default function PropertyCard({ property, locale, t }: PropertyCardProps)
         {primaryPhoto ? (
           <img
             src={primaryPhoto}
-            alt={property.title}
+            alt={property.photoAltText[0] || property.title}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
             loading="lazy"
           />

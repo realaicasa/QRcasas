@@ -48,9 +48,9 @@ export default async function NewPropertyPage({
     development: await getLocationsByType("Development"),
   };
 
-  async function handleCreate(data: PropertyFormData, tier: PricingTier) {
+  async function handleCreate(data: PropertyFormData, tier: PricingTier): Promise<string> {
     "use server";
-    await createProperty(agentId, {
+    return await createProperty(agentId, {
       title: data.title,
       description: data.description,
       keyFeatures: data.keyFeatures,
@@ -58,16 +58,16 @@ export default async function NewPropertyPage({
       currency: data.currency,
       listingType: data.listingType,
       listingTerm: data.listingTerm,
-       bedrooms: data.bedrooms ? (data.bedrooms === "Studio" ? 0 : Number(data.bedrooms.replace("+", ""))) : undefined,
+      bedrooms: data.bedrooms ? (data.bedrooms === "Studio" ? 0 : Number(data.bedrooms.replace("+", ""))) : undefined,
       bathrooms: data.bathrooms ? Number(data.bathrooms) : undefined,
       interiorArea: data.interiorArea ? Number(data.interiorArea) : undefined,
       areaUnit: data.areaUnit,
       publicLocation: data.publicLocation,
       city: data.city,
       area: data.area,
-       development: data.development,
-       latitude: data.latitude ? Number(data.latitude) : undefined,
-       longitude: data.longitude ? Number(data.longitude) : undefined,
+      development: data.development,
+      latitude: data.latitude ? Number(data.latitude) : undefined,
+      longitude: data.longitude ? Number(data.longitude) : undefined,
       wifi: data.wifi,
       elevator: data.elevator,
       pool: data.pool,
@@ -84,9 +84,8 @@ export default async function NewPropertyPage({
       seoDescriptionEn: data.seoDescriptionEn,
       seoDescriptionEs: data.seoDescriptionEs,
       seoKeywords: data.seoKeywords,
+      photoUpgradeRequested: data.photoUpgradeRequested,
     });
-    // TODO: Store tier.id, tier.price, expiryDate in a payment/order record
-    redirect(`/${locale}/account/properties`);
   }
 
   return (

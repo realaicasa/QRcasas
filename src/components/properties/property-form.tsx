@@ -10,6 +10,7 @@ interface PropertyFormProps {
   property?: PropertyRecord | null;
   tierLevel: string;
   onSubmit: (data: PropertyFormData) => void | Promise<void>;
+  onPhotosChange?: (photos: PropertyPhotoDraft[]) => void;
   locations?: {
     city: LocationOption[];
     area: LocationOption[];
@@ -51,6 +52,13 @@ export interface PropertyFormData {
   seoDescriptionEn: string;
   seoDescriptionEs: string;
   seoKeywords: string;
+  photoUpgradeRequested: boolean;
+}
+
+export interface PropertyPhotoDraft {
+  file: File;
+  altText: string;
+  previewUrl: string;
 }
 
 const LISTING_TYPES = ["Sale", "Rental"];
@@ -62,10 +70,11 @@ const FURNISHED_OPTIONS = ["Furnished", "Part furnished", "Unfurnished"];
 const LAUNDRY_OPTIONS = ["In unit", "Hookups", "Shared", "None"];
 const BEDROOM_OPTIONS = ["Studio", "1", "2", "3", "4", "5", "6", "7+"];
 
-export default function PropertyForm({ locale, property, tierLevel, onSubmit, locations }: PropertyFormProps) {
+export default function PropertyForm({ locale, property, tierLevel, onSubmit, locations, onPhotosChange }: PropertyFormProps) {
   const t = (en: string, es: string) => (locale === "es" ? es : en);
   const [saving, setSaving] = useState(false);
   const [newLocationFields, setNewLocationFields] = useState<Record<string, boolean>>({});
+  const [photos, setPhotos] = useState<PropertyPhotoDraft[]>([]);
 
   const [form, setForm] = useState<PropertyFormData>({
     title: property?.title ?? "",
@@ -101,6 +110,7 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
     seoDescriptionEn: property?.seoDescriptionEn ?? "",
     seoDescriptionEs: property?.seoDescriptionEs ?? "",
     seoKeywords: property?.seoKeywords ?? "",
+    photoUpgradeRequested: false,
   });
 
   const hasSeoAccess = tierLevel === "Pro_Plus";
@@ -117,6 +127,25 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
 
   const update = <K extends keyof PropertyFormData>(field: K, value: PropertyFormData[K]) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+
+  const updatePhotos = (next: PropertyPhotoDraft[]) => {
+    setPhotos(next);
+    onPhotosChange?.(next);
+  };
+
+  const addPhotos = (files: FileList | null) => {
+    if (!files) return;
+    const limit = form.photoUpgradeRequested ? 10 : 1;
+    updatePhotos(Array.from(files).slice(0, limit).map((file) => ({
+      file,
+      altText: "",
+      previewUrl: URL.createObjectURL(file),
+    })));
+  };
+
+  const updatePhotoAlt = (index: number, altText: string) => {
+    updatePhotos(photos.map((photo, photoIndex) => photoIndex === index ? { ...photo, altText } : photo));
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -258,6 +287,29 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
             </label>
           ))}
         </div>
+      </div>
+
+      <div className="border rounded-lg p-4 space-y-4">
+        <h3 className="font-medium text-sm">{t("Property Photos", "Fotos de la Propiedad")}</h3>
+        <p className="text-xs text-muted-foreground">
+          {t("The first image becomes the featured image. Standard listings allow one photo; the 200 MXN upgrade allows up to ten.", "La primera imagen será la imagen destacada. Los anuncios estándar permiten una foto; la mejora de 200 MXN permite hasta diez.")}
+        </p>
+        <label className="flex items-center gap-2 text-sm">
+          <input type="checkbox" checked={form.photoUpgradeRequested} onChange={(e) => update("photoUpgradeRequested", e.target.checked)} className="size-4 rounded border-border text-primary" />
+          {t("Add photo upgrade (+200 MXN)", "Agregar mejora de fotos (+200 MXN)")}
+        </label>
+        <input type="file" accept="image/*" multiple={form.photoUpgradeRequested} onChange={(e) => addPhotos(e.target.files)} className="block w-full text-sm" />
+        {photos.length > 0 && (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {photos.map((photo, index) => (
+              <div key={photo.previewUrl} className="rounded-lg border p-2">
+                <img src={photo.previewUrl} alt={photo.altText || t("Preview", "Vista previa")} className="mb-2 aspect-video w-full rounded object-cover" />
+                <p className="mb-1 text-xs font-medium text-primary">{index === 0 ? t("Featured image", "Imagen destacada") : `${t("Photo", "Foto")} ${index + 1}`}</p>
+                <input type="text" required placeholder={t("Alt text", "Texto alternativo")} value={photo.altText} onChange={(e) => updatePhotoAlt(index, e.target.value)} className="w-full rounded border px-2 py-1.5 text-sm" />
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Pricing & Type */}

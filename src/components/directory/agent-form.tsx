@@ -31,6 +31,7 @@ const CONTACT_CHANNELS = ["WhatsApp", "Phone", "Email", "Instagram", "Facebook"]
 export default function AgentForm({ locale, agent, tierLevel, onSubmit }: AgentFormProps) {
   const t = (en: string, es: string) => (locale === "es" ? es : en);
   const [saving, setSaving] = useState(false);
+  const [uploadMessage, setUploadMessage] = useState<string | null>(null);
 
   const [form, setForm] = useState<AgentFormData>({
     businessName: agent?.businessName ?? "",
@@ -61,6 +62,17 @@ export default function AgentForm({ locale, agent, tierLevel, onSubmit }: AgentF
 
   const update = (field: keyof AgentFormData, value: string) =>
     setForm((prev) => ({ ...prev, [field]: value }));
+
+  const uploadAgentImage = async (file: File | undefined, fieldId: string) => {
+    if (!file || !agent) return;
+    const data = new FormData();
+    data.append("recordId", agent.id);
+    data.append("fieldId", fieldId);
+    data.append("file", file);
+    setUploadMessage(t("Uploading image...", "Subiendo imagen..."));
+    const response = await fetch("/api/uploads/attachment", { method: "POST", body: data });
+    setUploadMessage(response.ok ? t("Image uploaded", "Imagen subida") : t("Upload failed", "Error al subir"));
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -125,6 +137,23 @@ export default function AgentForm({ locale, agent, tierLevel, onSubmit }: AgentF
           </select>
         </div>
       </div>
+
+      {agent && (
+        <div className="border rounded-lg p-4 space-y-4">
+          <h3 className="font-medium text-sm">{t("Profile images", "Imágenes del perfil")}</h3>
+          <div className="grid gap-4 sm:grid-cols-2">
+            <label className="text-sm">
+              <span className="mb-1 block text-xs font-medium text-muted-foreground">{t("Personal profile photo", "Foto personal de perfil")}</span>
+              <input type="file" accept="image/*" onChange={(e) => uploadAgentImage(e.target.files?.[0], "fldx4W6ZEhSV29zqJYV")} className="block w-full text-sm" />
+            </label>
+            <label className="text-sm">
+              <span className="mb-1 block text-xs font-medium text-muted-foreground">{t("Business logo", "Logo del negocio")}</span>
+              <input type="file" accept="image/*" onChange={(e) => uploadAgentImage(e.target.files?.[0], "fld6ugy4EQy1HQyseVg")} className="block w-full text-sm" />
+            </label>
+          </div>
+          {uploadMessage && <p className="text-xs text-muted-foreground">{uploadMessage}</p>}
+        </div>
+      )}
 
       {/* Profile Details */}
       <div className="border rounded-lg p-4 space-y-4">
