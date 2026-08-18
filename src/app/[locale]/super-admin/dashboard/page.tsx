@@ -1,98 +1,140 @@
+import { Metadata } from "next";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { getCustomerAuth } from "@/lib/customer-auth";
+import { getAllAgents } from "@/lib/data/agents";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
+import SuperAdminClient from "@/components/dashboard/super-admin-client";
 
-export interface ReportReason {
-  id: string;
-  en: string;
-  es: string;
-}
-
-export interface Report {
-  id: string;
-  userId: string;
-  propertyId?: string;
-  agentId?: string;
-  reason: ReportReason;
-  submittedAt: string;
-  status: "pending" | "approved" | "rejected";
-  notes?: string;
-}
-
-type AdminRole = "super_admin" | "moderator" | "member";
-
-interface DashboardProps {
-  reports: Report[];
-  totalReports: number;
-  adminRole: AdminRole;
-  locale?: string;
-}
-
-export default async function SuperAdminDashboard({ reports, totalReports, adminRole, locale = "en" }: DashboardProps) {
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
   const resolved: Locale = normalizeLocale(locale);
   const { t } = getCopy(resolved);
+  return { title: t("Super Admin", "Super Admin") };
+}
 
-  const filteredReports = totalReports > 0 && adminRole === "super_admin" 
-    ? reports.filter(r => r.status !== "approved" && r.status !== "rejected") 
-    : [];
+interface PageProps {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ q?: string }>;
+}
+
+export default async function SuperAdminDashboard({ params, searchParams }: PageProps) {
+  const { locale: raw } = await params;
+  const locale: Locale = normalizeLocale(raw);
+  const { t } = getCopy(locale);
+  const sp = await searchParams;
+
+  const store = await cookies();
+  const cookie = store.get("qrcasas_session")?.value;
+  const session = await getCustomerAuth(cookie);
+
+  if (!session) {
+    redirect(`/${locale}/login?next=/${locale}/super-admin/dashboard`);
+  }
+
+  if (session.email !== "realai.agency@gmail.com" && session.email !== "mike@dynamicmike.com") {
+    redirect(`/${locale}/login?next=/${locale}/super-admin/dashboard`);
+  }
+
+  const allAgents = await getAllAgents();
+
+  const query = (sp.q ?? "").trim().toLowerCase();
+  const filteredAgents = query
+    ? allAgents.filter((a) => {
+        return (
+          a.businessName.toLowerCase().includes(query) ||
+          (a.agentReference ?? "").toLowerCase().includes(query) ||
+          (a.specialistVocation ?? "").toLowerCase().includes(query)
+        );
+      })
+    : allAgents;
+
+  const pendingVerifications = allAgents.filter(
+    (a) => a.identityVerificationStatus === "Pending Review",
+  );
+  const featuredCount = allAgents.filter((a) => a.featuredAgent).length;
+  const verifiedCount = allAgents.filter(
+    (a) => a.identityVerificationStatus === "Verified",
+  ).length;
+
+  const agentRows = filteredAgents.map((a) => ({
+    id: a.agentId,
+    businessName: a.businessName,
+    agentReference: a.agentReference,
+    tierLevel: a.tierLevel,
+    featuredAgent: a.featuredAgent,
+    identityVerificationStatus: a.identityVerificationStatus,
+    specialistVocation: a.specialistVocation,
+    photoUrl: a.profilePhoto?.url,
+  }));
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-2xl font-bold">Super Admin Dashboard</h1>
-          <p className="text-sm text-muted-foreground">Manage reports and marketplace integrity</p>
+    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold">
+          {t("Super Admin Dashboard", "Panel de Super Admin")}
+        </h1>
+        <p className="text-sm text-muted-foreground">
+          {t("Manage agents, verifications, and featured listings", "Gestionar agentes, verificaciones y anuncios destacados")}
+        </p>
+      </div>
+
+      {/* Stats */}
+      <div className="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <div className="rounded-lg border border-border bg-card p-4 text-center">
+          <div className="text-2xl font-bold">{allAgents.length}</div>
+          <div className="text-xs text-muted-foreground">{t("Total Agents", "Total Agentes")}</div>
         </div>
-        <div className="flex gap-2">
-          {adminRole === "super_admin" && (
-            <button className="px-4 py-2 bg-blue-600 text-white rounded">View All Reports</button>
-          )}
-          {adminRole === "super_admin" && (
-            <button className="px-4 py-2 bg-green-600 text-white rounded">Export Reports</button>
-          )}
+        <div className="rounded-lg border border-border bg-card p-4 text-center">
+          <div className="text-2xl font-bold text-blue-600">{verifiedCount}</div>
+          <div className="text-xs text-muted-foreground">{t("Verified", "Verificados")}</div>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-4 text-center">
+          <div className="text-2xl font-bold text-amber-600">{pendingVerifications.length}</div>
+          <div className="text-xs text-muted-foreground">{t("Pending Review", "En Revisión")}</div>
+        </div>
+        <div className="rounded-lg border border-border bg-card p-4 text-center">
+          <div className="text-2xl font-bold text-primary">{featuredCount}</div>
+          <div className="text-xs text-muted-foreground">{t("Featured", "Destacados")}</div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredReports.map(report => (
-          <div key={report.id} className="bg-white rounded-lg shadow p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold">Report #{report.id}</h2>
-              <span className="text-sm text-muted-foreground">{report.status}</span>
-            </div>
-            
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Reason</label>
-                <select className="w-full rounded-lg border border-border px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary">
-                  {report.reason.en ? (
-                    <option value={report.reason.id}>{report.reason.en}</option>
-                  ) : (
-                    <option value="">-- Select reason --</option>
+      {/* Pending verifications */}
+      {pendingVerifications.length > 0 && (
+        <div className="mb-8 rounded-lg border-2 border-amber-200 bg-amber-50 p-4">
+          <h2 className="mb-3 text-sm font-semibold text-amber-900">
+            {t("Verification Requests Pending Review", "Solicitudes de Verificación Pendientes")}
+          </h2>
+          <div className="space-y-2">
+            {pendingVerifications.map((a) => (
+              <div key={a.agentId} className="flex items-center justify-between rounded-md bg-white px-3 py-2 text-sm">
+                <div>
+                  <span className="font-medium">{a.businessName}</span>
+                  {a.agentReference && (
+                    <span className="ml-2 text-xs text-muted-foreground">{a.agentReference}</span>
                   )}
-                </select>
+                </div>
+                <Link
+                  href={`/${locale}/directory/${a.agentId}`}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  {t("Review", "Revisar")}
+                </Link>
               </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Submitted by</label>
-                <span className="text-sm text-muted-foreground">{report.userId}</span>
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Submitted At</label>
-                <span className="text-sm text-muted-foreground">{new Date(report.submittedAt).toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {totalReports > 0 && (
-        <div className="mt-8 p-6 bg-amber-50 rounded-lg">
-          <h3 className="text-lg font-semibold mb-3">Summary</h3>
-          <div className="text-sm text-muted-foreground">
-            Total reports: <strong>{totalReports}</strong> (Pending: {filteredReports.length})
+            ))}
           </div>
         </div>
       )}
-    </div>
+
+      {/* Search + agent table */}
+      <SuperAdminClient
+        agents={agentRows}
+        locale={locale}
+        t={t}
+        initialQuery={sp.q ?? ""}
+      />
+    </main>
   );
 }
+
+import Link from "next/link";
