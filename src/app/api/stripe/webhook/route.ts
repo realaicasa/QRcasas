@@ -5,6 +5,7 @@ import {
   markRenewalPaid,
   setPropertiesPhotoPackagePaid,
 } from "@/lib/data/renewals";
+import { updateAgentProfile } from "@/lib/data/agents";
 
 interface StripeEvent {
   type: string;
@@ -15,6 +16,8 @@ interface StripeEvent {
       amount_total: number | null;
       currency: string | null;
       metadata: Record<string, string> | null;
+      customer?: string;
+      status?: string;
     };
   };
 }
@@ -97,6 +100,61 @@ export async function POST(req: NextRequest) {
     } catch (err) {
       console.error("Stripe webhook fulfillment error:", err);
       return NextResponse.json({ error: "Fulfillment failed" }, { status: 500 });
+    }
+  }
+
+  if (event.type === "checkout.session.completed" && event.data.object.metadata?.agentId) {
+    try {
+      const metadata = event.data.object.metadata;
+      const agentId = metadata.agentId;
+      if (metadata.requestVerified === "true") {
+        await updateAgentProfile(agentId, { verificationFeeActive: true } as never);
+      }
+      if (metadata.requestFeatured === "true") {
+        await updateAgentProfile(agentId, { featuredAgent: true } as never);
+      }
+    } catch (err) {
+      console.error("Subscription activation error:", err);
+    }
+  }
+
+  if (event.type === "customer.subscription.deleted" && event.data.object.metadata?.agentId) {
+    try {
+      const metadata = event.data.object.metadata;
+      const agentId = metadata.agentId;
+      if (metadata.requestVerified === "true") {
+        await updateAgentProfile(agentId, { verificationFeeActive: false, identityVerificationStatus: "Unverified" } as never);
+      }
+      if (metadata.requestFeatured === "true") {
+        await updateAgentProfile(agentId, { featuredAgent: false } as never);
+      }
+    } catch (err) {
+      console.error("Subscription deletion error:", err);
+    }
+  }
+
+  if (event.type === "customer.subscription.updated" && event.data.object.metadata?.agentId) {
+    try {
+      const metadata = event.data.object.metadata;
+      const agentId = metadata.agentId;
+      const status = event.data.object.status;
+      if (status === "active") {
+        if (metadata.requestVerified === "true") {
+          await updateAgentProfile(agentId, { verificationFeeActive: true } as never);
+        }
+        if (metadata.requestFeatured === "true") {
+          await updateAgentProfile(agentId, { featuredAgent: true } as never);
+        }
+      } else if (status === "canceled" || status === "unpaid" || status === "past_due") {
+        if (metadata.requestVerified === "true") {
+          await updateAgentProfile(agentId, { verificationFeeActive: false } as never);
+        }
+        if (metadata.requestFeatured === "true") {
+          await updateAgentProfile(agentId, { featuredAgent: false } as never);
+        }
+      }
+    } catch (err) {
+      console.error("Subscription update error:", err);
     }
   }
 

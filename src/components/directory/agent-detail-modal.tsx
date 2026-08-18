@@ -19,6 +19,22 @@ export default function AgentDetailModal({ agent, locale, t }: AgentDetailModalP
     setOpen(true);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const visitorId = sessionStorage.getItem("qrcasas_visitor") || `anon-${Date.now()}`;
+    sessionStorage.setItem("qrcasas_visitor", visitorId);
+    fetch("/api/activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        eventType: "agent_contact_modal_opened",
+        agentId: agent.id,
+        visitorId,
+        language: locale,
+      }),
+    }).catch(() => {});
+  }, [open, agent.id, locale]);
+
   const photoUrl = agent.profilePhoto?.url || agent.logoImage?.url;
   const displayName = agent.displayName;
   const agentRef = agent.agentReference;

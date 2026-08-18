@@ -178,7 +178,7 @@ export const FIELDS: Record<string, Record<string, FieldMeta>> = {
     Parent_Location: { id: "Parent_Location", real: "Parent Location", fieldId: "fld4A1eC3BxcIgIZ0Gf", type: "link", camel: "parentLocation" },
   },
 
-  Property_Activity: {
+Property_Activity: {
     __id: RECORD_FIELD,
     Activity: { id: "Activity", real: "Activity", fieldId: "fld5QW0BvXYWiwG4vV4", type: "text", camel: "activity" },
     Event_Type: { id: "Event_Type", real: "Event Type", fieldId: "fldWF2afOD5CxjcPbbh", type: "singleSelect", camel: "eventType" },
@@ -187,6 +187,7 @@ export const FIELDS: Record<string, Record<string, FieldMeta>> = {
     Language: { id: "Language", real: "Language", fieldId: "fldzniSWdlpaHInhq7A", type: "singleSelect", camel: "language" },
     User: { id: "User", real: "User", fieldId: "fldchSgkq0bhjSRFtFF", type: "link", camel: "user" },
     Property: { id: "Property", real: "Property", fieldId: "fld1lOe9O3BisdaEXa0", type: "link", camel: "property" },
+    Advertiser: { id: "Advertiser", real: "Advertiser", fieldId: "fldSChAn15nDORBnKNh", type: "link", camel: "advertiser" },
     Created: { id: "Created", real: "Created", fieldId: "fldE3vEdg6WPaYAqDO7", type: "createdTime" },
   },
 

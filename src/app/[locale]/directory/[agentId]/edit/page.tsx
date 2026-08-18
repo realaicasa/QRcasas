@@ -63,6 +63,20 @@ export default async function AgentEditPage({
         : agent!.identityVerificationStatus,
       featuredAgent: data.requestFeatured,
     } as Partial<AgentProfile>);
+
+    const wantsNewVerified = data.requestVerified && agent!.identityVerificationStatus !== "Verified" && !agent!.verificationFeeActive;
+    const wantsNewFeatured = data.requestFeatured && !agent!.featuredAgent;
+    if (wantsNewVerified || wantsNewFeatured) {
+      const res = await fetch(`${process.env.SITE_URL ?? "https://qrcasas.com"}/api/stripe/subscription`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ requestVerified: wantsNewVerified, requestFeatured: wantsNewFeatured }),
+      });
+      if (res.ok) {
+        const { url } = await res.json();
+        if (url) redirect(url);
+      }
+    }
   }
 
   return (

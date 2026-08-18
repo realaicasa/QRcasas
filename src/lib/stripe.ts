@@ -58,10 +58,11 @@ export async function createCheckoutSession(params: {
   successUrl: string;
   cancelUrl: string;
   metadata: Record<string, string>;
+  mode?: "payment" | "subscription";
 }): Promise<StripeCheckoutSession> {
   const key = getSecretKey();
   const body = new URLSearchParams();
-  body.set("mode", "payment");
+  body.set("mode", params.mode ?? "payment");
   body.set("success_url", params.successUrl);
   body.set("cancel_url", params.cancelUrl);
   body.set("customer_creation", "always");

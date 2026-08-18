@@ -6,6 +6,7 @@ import { getCustomerAuth } from "@/lib/customer-auth";
 import { getAgentByUserId } from "@/lib/data/agents";
 import { getPropertiesByAgent, type AgentPropertyListItem } from "@/lib/data/property";
 import { getRenewalByStripeSessionId } from "@/lib/data/renewals";
+import { countAgentContactOpens } from "@/lib/data/activity";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -141,6 +142,7 @@ export default async function AccountPropertiesPage({
   const activeCount = properties.filter((p) => p.status === "active" || p.status === "expiring_soon").length;
   const archivedCount = properties.filter((p) => p.status === "archived").length;
   const totalEnquiries = properties.reduce((sum, p) => sum + p.enquiryCount, 0);
+  const contactOpens = await countAgentContactOpens(agent.id);
 
   async function handleLogout() {
     "use server";
@@ -196,7 +198,7 @@ export default async function AccountPropertiesPage({
       )}
 
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-4 mb-6 sm:grid-cols-4">
         <div className="rounded-lg border p-4 text-center">
           <div className="text-2xl font-bold">{activeCount}</div>
           <div className="text-sm text-muted-foreground">{t("Active", "Activas")}</div>
@@ -207,7 +209,16 @@ export default async function AccountPropertiesPage({
         </div>
         <div className="rounded-lg border p-4 text-center">
           <div className="text-2xl font-bold">{totalEnquiries}</div>
-          <div className="text-sm text-muted-foreground">{t("Total Enquiries", "Total Consultas")}</div>
+          <div className="text-sm text-muted-foreground">{t("Enquiries", "Consultas")}</div>
+        </div>
+        <div className="rounded-lg border p-4 text-center">
+          <div className="text-2xl font-bold text-primary">{contactOpens.total}</div>
+          <div className="text-sm text-muted-foreground">
+            {t("Contact Opens", "Aperturas de Contacto")}
+          </div>
+          <div className="text-xs text-muted-foreground mt-0.5">
+            {contactOpens.thisMonth} {t("this month", "este mes")}
+          </div>
         </div>
       </div>
 
