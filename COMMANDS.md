@@ -3,14 +3,26 @@
 ## Initialize
 "Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Check git status, current branch, recent commits, and the Vercel deployment commit before changing code."
 
-## Stripe Webhook Setup (user action required)
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Remind the user to create the Stripe webhook endpoint at https://qrcasas.com/api/stripe/webhook with events checkout.session.completed and checkout.session.async_payment_succeeded, then copy the whsec_ signing secret into Vercel as STRIPE_WEBHOOK_SECRET. Without this, the webhook returns 503 and no payment is verified."
-
 ## Stripe End-to-End Test
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Verify STRIPE_WEBHOOK_SECRET is set in Vercel. Test a live-mode purchase: log in as agent, create a property, select a tier, complete Stripe checkout, confirm the webhook fires and marks the renewal Paid and sets Photo_Package=Paid. Report any failures."
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. All Stripe env vars are configured in Vercel (including STRIPE_WEBHOOK_SECRET). Test a live-mode purchase: log in as agent, create a property, select a tier, complete Stripe checkout, confirm the webhook fires and marks the renewal Paid and sets Photo_Package=Paid. Report any failures."
 
-## Payment Flow Debug
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Inspect the Stripe checkout route and webhook route for errors. Check Vercel logs for /api/stripe/webhook. Verify the webhook signature verification, amount_total check (minor units), and renewal cross-check logic. Fix the smallest root cause."
+## Agent Upsell Stripe Wiring
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Wire the Verified Agent (300 MXN/mo) and Featured Agent (300 MXN/mo) checkboxes in agent-form.tsx to Stripe recurring subscriptions. Create checkout route for subscriptions, add webhook events customer.subscription.updated and customer.subscription.deleted, add Stripe Customer Portal for billing management. The UI checkboxes already exist."
+
+## Auto-Advancing Featured Rails
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Upgrade the featured horizontal scroll sections on properties and directory pages to auto-advance every 8 seconds, pause on hover/focus, with compact section search above each rail. Arrow controls move one visible batch."
+
+## QR Code Downloads
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Add downloadable QR codes for each property (encoding /properties/{slug}?source=qr) and each agent profile (encoding /realtors/{slug}?source=qr&contact=1). QR should be 1024x1024 PNG, high error correction. Display on public property page, property edit dialog, and agent profile settings."
+
+## Contact Analytics
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Track Agent Contact Modal Opened events in the Property Activity table with an Advertiser link for aggregation. Show all-time and current-month contact opens on the agent dashboard. Only count signed-in contact reveals."
+
+## Agent Portfolio
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Add a portfolio section to the agent profile page with a stable #portfolio anchor. Property contact modals and directory agent modals should include 'View portfolio' links."
+
+## Super-admin Dashboard
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Verify the super-admin dashboard at /super-admin/dashboard shows agent stats, pending verification queue, and searchable agent table (by name, business, agent ID, specialty). Add ability to approve/reject identity verifications."
 
 ## Logo / PWA Icon Verification
 "Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Verify the deployed site shows the new brand logo in header and footer, the favicon in browser tabs, and the PWA icons in the manifest. Confirm all icon URLs point to the assets.cdn.filesafe.space CDN."
@@ -21,8 +33,8 @@
 ## Teable Verification
 "Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Verify Teable reads using environment variables only. Confirm TEABLE_API_URL resolves to https://app.teable.ai/api, never print TEABLE_API_TOKEN, and do not perform writes without reading the existing record first."
 
-## Advertiser Dashboard
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Continue the advertiser flow: protected /account/properties dashboard, property creation at /account/properties/new, ownership-gated editing, active/expiring/archived status, renewal selection, enquiry statistics, and payment banners. Verify all routes and tests."
-
 ## PR / Deployment Check
 "Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Inspect git status, git diff, git log --oneline -10, and origin tracking. Run npm run typecheck, npm test, and npm run build. Push only the intended changes to main (using realaicasa PAT if dynamicmike-dashboard is denied) and report the commit hash."
+
+## Merge Canonical Workspace
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. The Teable agent's workspace has commits 5a94793 and 7c3a788 with QR downloads, contact analytics, agent portfolios, auto-advancing rails, and recurring Stripe subscriptions. If they push to origin/main, pull and reconcile with our parallel implementations. If not, build those features here from scratch."
