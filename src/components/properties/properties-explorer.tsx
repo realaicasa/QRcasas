@@ -18,7 +18,6 @@ interface PropertiesExplorerProps {
   developments: LocationOption[];
   view: string;
   featuredProperties: PropertyListItem[];
-  t: (en: string, es: string) => string;
 }
 
 export default function PropertiesExplorer({
@@ -30,13 +29,14 @@ export default function PropertiesExplorer({
   developments,
   view,
   featuredProperties,
-  t,
 }: PropertiesExplorerProps) {
   const [mode, setMode] = useState<"featured" | "search" | "latest">("featured");
   const [featuredQuery, setFeaturedQuery] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
   const autoAdvanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pausedRef = useRef(false);
+
+  const t = (en: string, es: string) => (locale === "es" ? es : en);
 
   const scrollBy = (dir: number) => {
     if (scrollRef.current) {

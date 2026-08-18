@@ -19,17 +19,16 @@ interface AgentRow {
 interface SuperAdminClientProps {
   agents: AgentRow[];
   locale: Locale;
-  t: (en: string, es: string) => string;
   initialQuery: string;
 }
 
 export default function SuperAdminClient({
   agents,
   locale,
-  t,
   initialQuery,
 }: SuperAdminClientProps) {
   const [query, setQuery] = useState(initialQuery);
+  const t = (en: string, es: string) => (locale === "es" ? es : en);
 
   const filtered = query.trim()
     ? agents.filter((a) => {

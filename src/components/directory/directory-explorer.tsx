@@ -10,14 +10,12 @@ interface DirectoryExplorerProps {
   agents: AgentRecord[];
   featuredAgents: AgentRecord[];
   locale: Locale;
-  t: (en: string, es: string) => string;
 }
 
 export default function DirectoryExplorer({
   agents,
   featuredAgents,
   locale,
-  t,
 }: DirectoryExplorerProps) {
   const [mode, setMode] = useState<"featured" | "search" | "latest">("featured");
   const [query, setQuery] = useState("");
@@ -25,6 +23,8 @@ export default function DirectoryExplorer({
   const scrollRef = useRef<HTMLDivElement>(null);
   const autoAdvanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const pausedRef = useRef(false);
+
+  const t = (en: string, es: string) => (locale === "es" ? es : en);
 
   const scrollBy = (dir: number) => {
     if (scrollRef.current) {

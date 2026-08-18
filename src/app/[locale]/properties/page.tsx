@@ -111,7 +111,6 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
         developments={developments}
         view={view}
         featuredProperties={featuredProperties.properties}
-        t={t}
       />
 
       {/* Bottom sections */}

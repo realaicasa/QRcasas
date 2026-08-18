@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCustomerAuth } from "@/lib/customer-auth";
@@ -130,11 +131,8 @@ export default async function SuperAdminDashboard({ params, searchParams }: Page
       <SuperAdminClient
         agents={agentRows}
         locale={locale}
-        t={t}
         initialQuery={sp.q ?? ""}
       />
     </main>
   );
 }
-
-import Link from "next/link";

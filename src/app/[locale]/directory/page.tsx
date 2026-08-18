@@ -68,7 +68,6 @@ export default async function DirectoryPage({
           agents={agents}
           featuredAgents={featuredAgents}
           locale={locale}
-          t={t}
         />
       </div>
 
