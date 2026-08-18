@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { BadgeCheck, Sparkles, Upload, Lock } from "lucide-react";
 import type { AgentProfile } from "@/lib/data/agents";
+import type { Locale } from "@/lib/i18n";
 import SeoFields from "@/components/dashboard/seo-fields";
+import QrCodeDisplay from "@/components/shared/qr-code-display";
 
 interface AgentFormProps {
   locale: string;
@@ -260,6 +262,16 @@ export default function AgentForm({ locale, agent, tierLevel, onSubmit }: AgentF
           </div>
           {uploadMessage && <p className="text-xs text-muted-foreground">{uploadMessage}</p>}
         </div>
+      )}
+
+      {/* Agent QR Code */}
+      {agent && agent.customSlug && (
+        <QrCodeDisplay
+          url={`${typeof window !== "undefined" ? window.location.origin : "https://qrcasas.com"}/realtors/${agent.customSlug}?source=qr&contact=1`}
+          label={agent.businessName}
+          locale={locale as Locale}
+          t={t}
+        />
       )}
 
       {/* Profile Details */}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Search, BadgeCheck, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import type { AgentRecord } from "@/lib/data/agents";
@@ -21,13 +21,43 @@ export default function DirectoryExplorer({
 }: DirectoryExplorerProps) {
   const [mode, setMode] = useState<"featured" | "search" | "latest">("featured");
   const [query, setQuery] = useState("");
+  const [featuredQuery, setFeaturedQuery] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const autoAdvanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pausedRef = useRef(false);
 
   const scrollBy = (dir: number) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ left: dir * 320, behavior: "smooth" });
     }
   };
+
+  const filteredFeatured = featuredQuery.trim()
+    ? featuredAgents.filter((a) => {
+        const q = featuredQuery.toLowerCase();
+        return a.businessName.toLowerCase().includes(q) || (a.specialistVocation ?? "").toLowerCase().includes(q);
+      })
+    : featuredAgents;
+
+  useEffect(() => {
+    if (autoAdvanceRef.current) clearInterval(autoAdvanceRef.current);
+    if (filteredFeatured.length === 0) return;
+
+    autoAdvanceRef.current = setInterval(() => {
+      if (pausedRef.current || !scrollRef.current) return;
+      const el = scrollRef.current;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10;
+      if (atEnd) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: 320, behavior: "smooth" });
+      }
+    }, 8000);
+
+    return () => {
+      if (autoAdvanceRef.current) clearInterval(autoAdvanceRef.current);
+    };
+  }, [filteredFeatured.length]);
 
   const filtered = query.trim()
     ? agents.filter((a) => {
@@ -71,13 +101,20 @@ export default function DirectoryExplorer({
       </div>
 
       {/* Featured horizontal scroll - always visible */}
-      {featuredAgents.length > 0 && mode === "featured" && (
+      {filteredFeatured.length > 0 && (
         <div className="mb-12">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between gap-4">
             <h2 className="text-lg font-bold">
               {t("Featured Agents", "Agentes Destacados")}
             </h2>
             <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={featuredQuery}
+                onChange={(e) => setFeaturedQuery(e.target.value)}
+                placeholder={t("Search featured...", "Buscar destacados...")}
+                className="w-40 rounded-lg border border-input bg-background px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40 sm:w-56"
+              />
               <button
                 onClick={() => scrollBy(-1)}
                 className="rounded-full border border-border p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -98,8 +135,12 @@ export default function DirectoryExplorer({
             ref={scrollRef}
             className="flex gap-4 overflow-x-auto scroll-smooth pb-4"
             style={{ scrollbarWidth: "thin" }}
+            onMouseEnter={() => { pausedRef.current = true; }}
+            onMouseLeave={() => { pausedRef.current = false; }}
+            onFocus={() => { pausedRef.current = true; }}
+            onBlur={() => { pausedRef.current = false; }}
           >
-            {featuredAgents.map((agent) => (
+            {filteredFeatured.map((agent) => (
               <FeaturedAgentCard key={agent.agentId} agent={agent} locale={locale} t={t} />
             ))}
           </div>
@@ -149,13 +190,20 @@ export default function DirectoryExplorer({
       )}
 
       {/* Featured always visible at bottom in search/latest modes */}
-      {featuredAgents.length > 0 && mode !== "featured" && (
+      {filteredFeatured.length > 0 && mode !== "featured" && (
         <div className="mt-12">
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between gap-4">
             <h2 className="text-lg font-bold">
               {t("Featured Agents", "Agentes Destacados")}
             </h2>
             <div className="flex items-center gap-2">
+              <input
+                type="text"
+                value={featuredQuery}
+                onChange={(e) => setFeaturedQuery(e.target.value)}
+                placeholder={t("Search featured...", "Buscar destacados...")}
+                className="w-40 rounded-lg border border-input bg-background px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40 sm:w-56"
+              />
               <button
                 onClick={() => scrollBy(-1)}
                 className="rounded-full border border-border p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -176,8 +224,12 @@ export default function DirectoryExplorer({
             ref={scrollRef}
             className="flex gap-4 overflow-x-auto scroll-smooth pb-4"
             style={{ scrollbarWidth: "thin" }}
+            onMouseEnter={() => { pausedRef.current = true; }}
+            onMouseLeave={() => { pausedRef.current = false; }}
+            onFocus={() => { pausedRef.current = true; }}
+            onBlur={() => { pausedRef.current = false; }}
           >
-            {featuredAgents.map((agent) => (
+            {filteredFeatured.map((agent) => (
               <FeaturedAgentCard key={agent.agentId} agent={agent} locale={locale} t={t} />
             ))}
           </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Search, Clock, ChevronLeft, ChevronRight } from "lucide-react";
 import FilterBar from "@/components/properties/filter-bar";
 import PropertyCard from "@/components/properties/property-card";
@@ -33,13 +33,43 @@ export default function PropertiesExplorer({
   t,
 }: PropertiesExplorerProps) {
   const [mode, setMode] = useState<"featured" | "search" | "latest">("featured");
+  const [featuredQuery, setFeaturedQuery] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
+  const autoAdvanceRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pausedRef = useRef(false);
 
   const scrollBy = (dir: number) => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ left: dir * 340, behavior: "smooth" });
     }
   };
+
+  const filteredFeatured = featuredQuery.trim()
+    ? featuredProperties.filter((p) => {
+        const q = featuredQuery.toLowerCase();
+        return (p.title ?? "").toLowerCase().includes(q) || (p.publicLocation ?? "").toLowerCase().includes(q);
+      })
+    : featuredProperties;
+
+  useEffect(() => {
+    if (autoAdvanceRef.current) clearInterval(autoAdvanceRef.current);
+    if (filteredFeatured.length === 0) return;
+
+    autoAdvanceRef.current = setInterval(() => {
+      if (pausedRef.current || !scrollRef.current) return;
+      const el = scrollRef.current;
+      const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 10;
+      if (atEnd) {
+        el.scrollTo({ left: 0, behavior: "smooth" });
+      } else {
+        el.scrollBy({ left: 340, behavior: "smooth" });
+      }
+    }, 8000);
+
+    return () => {
+      if (autoAdvanceRef.current) clearInterval(autoAdvanceRef.current);
+    };
+  }, [filteredFeatured.length]);
 
   const latestProperties = properties.slice(0, 12);
 
@@ -77,13 +107,20 @@ export default function PropertiesExplorer({
 
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
         {/* Featured horizontal scroll - always visible */}
-        {featuredProperties.length > 0 && (
+        {filteredFeatured.length > 0 && (
           <div className="mb-12">
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex items-center justify-between gap-4">
               <h2 className="text-lg font-bold">
                 {t("Featured Properties", "Propiedades Destacadas")}
               </h2>
               <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={featuredQuery}
+                  onChange={(e) => setFeaturedQuery(e.target.value)}
+                  placeholder={t("Search featured...", "Buscar destacadas...")}
+                  className="w-40 rounded-lg border border-input bg-background px-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary/40 sm:w-56"
+                />
                 <button
                   onClick={() => scrollBy(-1)}
                   className="rounded-full border border-border p-2 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
@@ -104,8 +141,12 @@ export default function PropertiesExplorer({
               ref={scrollRef}
               className="flex gap-4 overflow-x-auto scroll-smooth pb-4"
               style={{ scrollbarWidth: "thin" }}
+              onMouseEnter={() => { pausedRef.current = true; }}
+              onMouseLeave={() => { pausedRef.current = false; }}
+              onFocus={() => { pausedRef.current = true; }}
+              onBlur={() => { pausedRef.current = false; }}
             >
-              {featuredProperties.map((property) => (
+              {filteredFeatured.map((property) => (
                 <div key={property.id} className="w-80 shrink-0">
                   <PropertyCard property={property} locale={locale} t={t} />
                 </div>

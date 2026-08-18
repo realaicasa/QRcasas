@@ -8,6 +8,7 @@ import { getCustomerAuth } from "@/lib/customer-auth";
 import { absoluteUrl } from "@/lib/request";
 import EnquiryForm from "@/components/properties/enquiry-form";
 import ContactDetailsModal from "@/components/properties/contact-details-modal";
+import QrCodeDisplay from "@/components/shared/qr-code-display";
 
 export const dynamic = "force-dynamic";
 export const revalidate = 0;
@@ -325,6 +326,16 @@ export default async function PropertyPage({
           advertiser={advertiser}
         />
       )}
+
+        {/* QR Code */}
+        <div className="mt-8">
+          <QrCodeDisplay
+            url={absoluteUrl(`/properties/${property.slug}?source=qr`)}
+            label={property.title || "Property"}
+            locale={locale}
+            t={t}
+          />
+        </div>
 
         {/* Map placeholder */}
         {property.latitude != null && property.longitude != null && (
