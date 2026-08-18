@@ -8,10 +8,10 @@ interface QrCodeDisplayProps {
   url: string;
   label: string;
   locale: Locale;
-  t: (en: string, es: string) => string;
 }
 
-export default function QrCodeDisplay({ url, label, locale, t }: QrCodeDisplayProps) {
+export default function QrCodeDisplay({ url, label, locale }: QrCodeDisplayProps) {
+  const t = (en: string, es: string) => (locale === "es" ? es : en);
   const [copied, setCopied] = useState(false);
   const [showQr, setShowQr] = useState(false);
 

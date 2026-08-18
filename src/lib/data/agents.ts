@@ -10,6 +10,7 @@ import { TAGS, invalidate } from "./cache";
 export interface AgentRecord {
   agentId: string;
   businessName: string;
+  displayName: string | null;
   tierLevel: "Free" | "Pro" | "Pro_Plus";
   primaryContactChannel: "WhatsApp" | "Phone" | "Email" | "Instagram" | "Facebook";
   primaryContactValue: string;
@@ -82,6 +83,7 @@ function parseAgentRow(row: SqlRow): AgentRecord {
   return {
     agentId: String(row.__id ?? ""),
     businessName: String(row.Business_Name ?? ""),
+    displayName: row.Display_Name != null ? String(row.Display_Name) : null,
     tierLevel: (row.Tier_Level as "Free" | "Pro" | "Pro_Plus") ?? "Free",
     primaryContactChannel: (row.Primary_Contact_Channel as "WhatsApp" | "Phone" | "Email" | "Instagram" | "Facebook") ?? "WhatsApp",
     primaryContactValue: String(row.Primary_Contact_Value ?? ""),
@@ -151,6 +153,7 @@ export async function getAllAgents(): Promise<AgentRecord[]> {
     [
       qi("__id"),
       qi("Business_Name"),
+      qi("Display_Name"),
       qi("Tier_Level"),
       qi("Primary_Contact_Channel"),
       qi("Primary_Contact_Value"),

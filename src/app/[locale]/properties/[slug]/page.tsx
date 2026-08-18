@@ -333,7 +333,6 @@ export default async function PropertyPage({
             url={absoluteUrl(`/properties/${property.slug}?source=qr`)}
             label={property.title || "Property"}
             locale={locale}
-            t={t}
           />
         </div>
 

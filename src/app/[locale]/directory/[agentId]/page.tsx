@@ -71,7 +71,7 @@ export default async function AgentProfilePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <AgentDetailModal agent={agent} locale={locale} t={t} />
+      <AgentDetailModal agent={agent} locale={locale} />
     </>
   );
 }

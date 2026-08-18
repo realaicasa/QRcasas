@@ -9,10 +9,10 @@ import type { Locale } from "@/lib/i18n";
 interface AgentDetailModalProps {
   agent: AgentProfile;
   locale: Locale;
-  t: (en: string, es: string) => string;
 }
 
-export default function AgentDetailModal({ agent, locale, t }: AgentDetailModalProps) {
+export default function AgentDetailModal({ agent, locale }: AgentDetailModalProps) {
+  const t = (en: string, es: string) => (locale === "es" ? es : en);
   const [open, setOpen] = useState(false);
 
   useEffect(() => {

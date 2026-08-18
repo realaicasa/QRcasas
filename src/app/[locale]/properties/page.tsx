@@ -5,6 +5,7 @@ import { getPublicProperties, type PropertyListFilters, type PropertySortOption 
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 import { getLocationsByType } from "@/lib/data/locations";
 import PropertiesExplorer from "@/components/properties/properties-explorer";
+import SponsorModal from "@/components/sponsors/sponsor-modal";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }): Promise<Metadata> {
   const params = await searchParams;
@@ -145,13 +146,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
             )}
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
-            <Link
-              href={`/${locale}/directory`}
-              className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-blue-700"
-            >
-              <Users className="size-4" />
-              {t("Real Estate Agents", "Agentes Inmobiliarios")}
-            </Link>
+            <SponsorModal locale={locale} />
             <Link
               href={`/${locale}/account/properties/new`}
               className="inline-flex items-center justify-center gap-2 rounded-lg bg-teal-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-teal-700"

@@ -270,7 +270,6 @@ export default function AgentForm({ locale, agent, tierLevel, onSubmit }: AgentF
           url={`${typeof window !== "undefined" ? window.location.origin : "https://qrcasas.com"}/realtors/${agent.customSlug}?source=qr&contact=1`}
           label={agent.businessName}
           locale={locale as Locale}
-          t={t}
         />
       )}
 

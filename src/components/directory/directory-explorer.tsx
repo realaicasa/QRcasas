@@ -250,6 +250,7 @@ function SimpleAgentCard({
 }) {
   const photoUrl = agent.profilePhoto?.url || agent.profilePhoto?.signedUrl;
   const isVerified = agent.identityVerificationStatus === "Verified";
+  const name = agent.displayName || agent.businessName;
 
   return (
     <Link
@@ -259,22 +260,25 @@ function SimpleAgentCard({
       <div className="flex items-center gap-3">
         <div className="size-14 shrink-0 overflow-hidden rounded-lg bg-muted">
           {photoUrl ? (
-            <img src={photoUrl} alt={agent.businessName} className="h-full w-full object-cover" />
+            <img src={photoUrl} alt={name} className="h-full w-full object-cover" />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-lg font-bold text-primary">
-              {agent.businessName.charAt(0).toUpperCase()}
+              {name.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1">
             <h3 className="truncate text-sm font-semibold">
-              {agent.businessName}
+              {name}
             </h3>
             {isVerified && <BadgeCheck className="size-4 shrink-0 text-blue-500" />}
           </div>
+          {agent.displayName && agent.businessName && (
+            <p className="truncate text-xs text-muted-foreground">{agent.businessName}</p>
+          )}
           {agent.specialistVocation && (
-            <p className="truncate text-xs text-muted-foreground">
+            <p className="truncate text-xs text-muted-foreground mt-0.5">
               {agent.specialistVocation}
             </p>
           )}
