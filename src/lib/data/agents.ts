@@ -15,6 +15,11 @@ export interface AgentRecord {
   primaryContactValue: string;
   defaultLanguage: "en" | "es";
   isVerified: boolean;
+  featuredAgent: boolean;
+  agentReference: string | null;
+  identityVerificationStatus: string | null;
+  specialistVocation: string | null;
+  profilePhoto: { url?: string; signedUrl?: string } | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -38,6 +43,15 @@ export interface AgentProfile {
   seoDescription: string | null;
   seoKeywords: string | null;
   isVerified: boolean;
+  displayName: string | null;
+  tagline: string | null;
+  agentReference: string | null;
+  featuredAgent: boolean;
+  identityVerificationStatus: string | null;
+  verificationFeeActive: boolean;
+  specialistVocation: string | null;
+  publicWhatsApp: string | null;
+  publicEmail: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -58,6 +72,13 @@ export function resolveAgentSeoDescription(agent: AgentProfile): string | null {
 }
 
 function parseAgentRow(row: SqlRow): AgentRecord {
+  const photoRaw = row.Profile_Photo;
+  const profilePhoto = photoRaw && typeof photoRaw === "object"
+    ? {
+        url: typeof (photoRaw as Record<string, unknown>).url === "string" ? String((photoRaw as Record<string, unknown>).url) : undefined,
+        signedUrl: typeof (photoRaw as Record<string, unknown>).signedUrl === "string" ? String((photoRaw as Record<string, unknown>).signedUrl) : undefined,
+      }
+    : null;
   return {
     agentId: String(row.__id ?? ""),
     businessName: String(row.Business_Name ?? ""),
@@ -66,6 +87,11 @@ function parseAgentRow(row: SqlRow): AgentRecord {
     primaryContactValue: String(row.Primary_Contact_Value ?? ""),
     defaultLanguage: (row.Default_Language as "en" | "es") ?? "es",
     isVerified: row.Is_Verified === true,
+    featuredAgent: row.Featured_Agent === true,
+    agentReference: row.Agent_Reference != null ? String(row.Agent_Reference) : null,
+    identityVerificationStatus: row.Identity_Verification_Status != null ? String(row.Identity_Verification_Status) : null,
+    specialistVocation: row.Specialist_Vocation != null ? String(row.Specialist_Vocation) : null,
+    profilePhoto,
     createdAt: String(row.Created ?? ""),
     updatedAt: String(row.Updated ?? ""),
   };
@@ -104,6 +130,15 @@ function parseAgentProfile(row: SqlRow): AgentProfile {
     seoDescription: row.SEO_Description != null ? String(row.SEO_Description) : null,
     seoKeywords: row.SEO_Keywords != null ? String(row.SEO_Keywords) : null,
     isVerified: row.Is_Verified === true,
+    displayName: row.Display_Name != null ? String(row.Display_Name) : null,
+    tagline: row.Tagline != null ? String(row.Tagline) : null,
+    agentReference: row.Agent_Reference != null ? String(row.Agent_Reference) : null,
+    featuredAgent: row.Featured_Agent === true,
+    identityVerificationStatus: row.Identity_Verification_Status != null ? String(row.Identity_Verification_Status) : null,
+    verificationFeeActive: row.Verification_Fee_Active === true,
+    specialistVocation: row.Specialist_Vocation != null ? String(row.Specialist_Vocation) : null,
+    publicWhatsApp: row.Public_WhatsApp != null ? String(row.Public_WhatsApp) : null,
+    publicEmail: row.Public_Email != null ? String(row.Public_Email) : null,
     createdAt: String(row.Created ?? ""),
     updatedAt: String(row.Updated ?? ""),
   };
@@ -121,6 +156,11 @@ export async function getAllAgents(): Promise<AgentRecord[]> {
       qi("Primary_Contact_Value"),
       qi("Default_Language"),
       qi("Is_Verified"),
+      qi("Featured_Agent"),
+      qi("Agent_Reference"),
+      qi("Identity_Verification_Status"),
+      qi("Specialist_Vocation"),
+      qi("Profile_Photo"),
       qi("Created"),
       qi("Updated"),
     ].join(", ") +
@@ -159,6 +199,15 @@ export async function getAgentById(agentId: string): Promise<AgentProfile | null
       qi("SEO_Description"),
       qi("SEO_Keywords"),
       qi("Is_Verified"),
+      qi("Display_Name"),
+      qi("Tagline"),
+      qi("Agent_Reference"),
+      qi("Featured_Agent"),
+      qi("Identity_Verification_Status"),
+      qi("Verification_Fee_Active"),
+      qi("Specialist_Vocation"),
+      qi("Public_WhatsApp"),
+      qi("Public_Email"),
       qi("Created"),
       qi("Updated"),
     ].join(", ") +
@@ -167,10 +216,7 @@ export async function getAgentById(agentId: string): Promise<AgentProfile | null
     " WHERE " +
     qi("__id") +
     " = " +
-    lit(agentId) +
-    " AND " +
-    qi("Is_Verified") +
-    " IS TRUE";
+    lit(agentId);
   const rows = await client.runSql<SqlRow>(sql);
   return rows.length > 0 ? parseAgentProfile(rows[0]) : null;
 }

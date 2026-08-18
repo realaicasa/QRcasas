@@ -533,6 +533,7 @@ export interface PropertyListFilters {
   location?: string;
   areaId?: string;
   developmentId?: string;
+  featured?: boolean;
   petFriendly?: boolean;
   parking?: boolean;
   nearShopping?: boolean;
@@ -577,6 +578,7 @@ export async function getPublicProperties(
   }
   if (filters.areaId) whereClauses.push(qi("Area") + " = " + lit(filters.areaId));
   if (filters.developmentId) whereClauses.push(qi("Development") + " = " + lit(filters.developmentId));
+  if (filters.featured === true) whereClauses.push(qi("Featured") + " IS TRUE");
   const featureFilters: Array<[keyof PropertyListFilters, string]> = [
     ["wifi", "Wi_Fi"],
     ["elevator", "Elevator"],

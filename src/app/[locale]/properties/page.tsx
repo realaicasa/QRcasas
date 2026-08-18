@@ -1,11 +1,8 @@
 import { Metadata } from "next";
-import Link from "next/link";
 import { getPublicProperties, type PropertyListFilters, type PropertySortOption } from "@/lib/data/property";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
-import PropertyCard from "@/components/properties/property-card";
-import FilterBar from "@/components/properties/filter-bar";
-import MapView from "@/components/properties/map-view";
 import { getLocationsByType } from "@/lib/data/locations";
+import PropertiesExplorer from "@/components/properties/properties-explorer";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }): Promise<Metadata> {
   const params = await searchParams;
@@ -79,11 +76,11 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
     getLocationsByType("Area"),
     getLocationsByType("Development"),
   ]);
-  const totalPages = Math.ceil(total / pageSize);
+
+  const featuredProperties = await getPublicProperties({ featured: true }, "newest", 20, 0);
 
   return (
     <main>
-      {/* Hero */}
       <section className="bg-hero border-b border-border/60">
         <div className="mx-auto w-full max-w-7xl px-4 py-14 sm:px-6 sm:py-16">
           <div className="max-w-3xl">
@@ -103,98 +100,20 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
         </div>
       </section>
 
-      {/* Filter Bar */}
-      <FilterBar total={total} locale={locale} cities={cities} areas={areas} developments={developments} />
+      <PropertiesExplorer
+        properties={properties}
+        total={total}
+        locale={locale}
+        cities={cities}
+        areas={areas}
+        developments={developments}
+        view={view}
+        featuredProperties={featuredProperties.properties}
+        t={t}
+      />
 
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6">
-        {/* Results map */}
-        {view !== "list" && <div className="mb-8">
-          <h2 className="mb-3 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-            {t("Results map", "Mapa de resultados")}
-          </h2>
-          <MapView properties={properties} locale={locale} />
-        </div>}
-
-        {/* Property grid */}
-        {view !== "map" && (properties.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border bg-card/60 py-20 text-center">
-            <p className="text-lg font-semibold mb-2">
-              {t(
-                "No published properties match these filters.",
-                "No hay propiedades publicadas que coincidan con estos filtros."
-              )}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {t(
-                "Clear one or more filters to broaden the search.",
-                "Limpia uno o más filtros para ampliar la búsqueda."
-              )}
-            </p>
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {properties.map((property) => (
-              <PropertyCard key={property.id} property={property} locale={locale} t={t} />
-            ))}
-          </div>
-        ))}
-
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <nav className="mt-10 flex items-center justify-center gap-2">
-            {page > 1 && (
-              <a
-                href={`?${new URLSearchParams({
-                  ...(filters.listingType ? { listingType: filters.listingType } : {}),
-                  ...(filters.minPrice != null ? { minPrice: String(filters.minPrice) } : {}),
-                  ...(filters.maxPrice != null ? { maxPrice: String(filters.maxPrice) } : {}),
-                  ...(filters.bedrooms != null ? { bedrooms: String(filters.bedrooms) } : {}),
-                  ...(filters.location ? { location: filters.location } : {}),
-                  sort,
-                  page: String(page - 1),
-                }).toString()}`}
-                className="rounded-lg border border-border px-4 py-2 text-sm transition-colors hover:bg-muted"
-              >
-                {t("Previous", "Anterior")}
-              </a>
-            )}
-            <span className="text-sm text-muted-foreground">
-              {t(`Page ${page} of ${totalPages}`, `Página ${page} de ${totalPages}`)}
-            </span>
-            {page < totalPages && (
-              <a
-                href={`?${new URLSearchParams({
-                  ...(filters.listingType ? { listingType: filters.listingType } : {}),
-                  ...(filters.minPrice != null ? { minPrice: String(filters.minPrice) } : {}),
-                  ...(filters.maxPrice != null ? { maxPrice: String(filters.maxPrice) } : {}),
-                  ...(filters.bedrooms != null ? { bedrooms: String(filters.bedrooms) } : {}),
-                  ...(filters.location ? { location: filters.location } : {}),
-                  sort,
-                  page: String(page + 1),
-                }).toString()}`}
-                className="rounded-lg border border-border px-4 py-2 text-sm transition-colors hover:bg-muted"
-              >
-                {t("Next", "Siguiente")}
-              </a>
-            )}
-          </nav>
-        )}
-
-        {/* Latest market updates */}
-        <div className="mt-10 rounded-xl border border-border bg-card p-6">
-          <h3 className="text-lg font-semibold mb-4">
-            {t("Latest market updates", "Últimas actualizaciones del mercado")}
-          </h3>
-          <div className="text-center py-8 text-sm text-muted-foreground">
-            {t(
-              "No sourced updates yet. The administrator can add the first bilingual market update.",
-              "Aún no hay actualizaciones. El administrador puede agregar la primera actualización bilingüe del mercado."
-            )}
-          </div>
-        </div>
-
-        {/* Marketplace notice */}
-        <div className="mt-8 rounded-xl border border-border bg-card/60 p-6">
+        <div className="rounded-xl border border-border bg-card/60 p-6">
           <h3 className="text-sm font-semibold mb-3">
             {t("Marketplace notice", "Aviso del mercado")}
           </h3>
