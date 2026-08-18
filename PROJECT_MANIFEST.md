@@ -1,10 +1,10 @@
 # QRcasas Project Manifest
 
 ## Status
-- Current goal: Complete Stripe payment integration end-to-end and verify in production.
-- Last session date: 2026-08-17.
+- Current goal: Complete UI/UX redesign + Stripe payment integration.
+- Last session date: 2026-08-18.
 - Current branch: `main`.
-- Current commit: `142dd7de` (Add Stripe checkout, verified webhook, and payment status banners).
+- Current commit: `d3ee11d1` (Redesign properties and directory pages).
 - Working tree: clean; `main` is pushed to `origin/main`.
 
 ## System State
@@ -71,9 +71,11 @@ Still needed:
 - Do not store tokens in this manifest or Git.
 
 ## Pending / Next
-- [ ] **User must create Stripe webhook endpoint** in dashboard → copy `whsec_…` → set `STRIPE_WEBHOOK_SECRET` in Vercel. Without this, webhook returns 503 and no payment is verified.
-- [ ] Test a live-mode purchase end-to-end: create property → checkout → pay → webhook fires → renewal marked Paid → Photo_Package set to Paid → agent can upload up to 10 photos.
-- [ ] Rotate exposed credentials: GitHub PAT, Teable PAT, Stripe restricted key.
-- [ ] Verify the deployed site shows the new logo/favicon/PWA icons.
+- [ ] Agent upsell checkboxes in edit profile: Verified (300 MXN/mo recurring) + Featured Agent (300 MXN/mo recurring) — linked to Stripe
+- [ ] Verified agent: blue tick, proof of ID image upload field, Identity Verification Status workflow
+- [ ] Featured agent: appears in directory homepage horizontal scroll
+- [ ] Super-admin dashboard: search by name, business, agent ID reference
+- [ ] Auto-generate agent ID reference (Agent_Reference field) on profile creation
+- [ ] Test Stripe end-to-end: create property → checkout → pay → webhook → Paid
+- [ ] Rotate exposed credentials: GitHub PAT, Teable PAT, Stripe restricted key
 - [ ] Do not recreate the five removed duplicate lifecycle fields.
-- [ ] Canonical audit commits `5e8bb9e`, `e5922a2`, `d94058f`, `a58c60a` are NOT in this checkout's history — they were in a separate workspace. The Stripe code was recreated from scratch here instead.
