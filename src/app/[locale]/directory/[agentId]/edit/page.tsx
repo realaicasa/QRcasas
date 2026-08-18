@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { getCustomerAuth } from "@/lib/customer-auth";
-import { getAgentByUserId, updateAgentProfile } from "@/lib/data/agents";
+import { getAgentByUserId, updateAgentProfile, type AgentProfile } from "@/lib/data/agents";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 import AgentForm from "@/components/directory/agent-form";
 import type { AgentFormData } from "@/components/directory/agent-form";
@@ -53,7 +53,16 @@ export default async function AgentEditPage({
       seoTitle: data.seoTitle || null,
       seoDescription: data.seoDescription || null,
       seoKeywords: data.seoKeywords || null,
-    });
+      displayName: data.displayName || null,
+      tagline: data.tagline || null,
+      publicWhatsApp: data.publicWhatsApp || null,
+      publicEmail: data.publicEmail || null,
+      specialistVocation: data.specialistVocation || null,
+      identityVerificationStatus: data.requestVerified
+        ? (agent!.identityVerificationStatus === "Verified" ? "Verified" : "Pending Review")
+        : agent!.identityVerificationStatus,
+      featuredAgent: data.requestFeatured,
+    } as Partial<AgentProfile>);
   }
 
   return (

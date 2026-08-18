@@ -242,6 +242,7 @@ export async function createAgent(
   input: CreateAgentInput,
 ): Promise<string> {
   const client = new TeableClient(getTeableConfig());
+  const agentReference = `QRC-${Date.now().toString(36).toUpperCase().slice(-6)}`;
   const record = await client.createRecord(TABLES.Agents, {
     [FIELDS.Agents.Business_Name.id]: input.businessName,
     [FIELDS.Agents.Primary_Contact_Channel.id]: input.primaryContactChannel,
@@ -250,6 +251,9 @@ export async function createAgent(
     [FIELDS.Agents.Tier_Level.id]: "Free",
     [FIELDS.Agents.Is_Verified.id]: false,
     [FIELDS.Agents.User.id]: [{ id: userId }],
+    [FIELDS.Agents.Agent_Reference.id]: agentReference,
+    [FIELDS.Agents.Identity_Verification_Status.id]: "Unverified",
+    [FIELDS.Agents.Featured_Agent.id]: false,
   });
   await invalidate({ tags: [TAGS.AGENTS] });
   return record.id;
@@ -278,6 +282,15 @@ export async function getAgentByUserId(userId: string): Promise<AgentProfile | n
       qi("SEO_Description"),
       qi("SEO_Keywords"),
       qi("Is_Verified"),
+      qi("Display_Name"),
+      qi("Tagline"),
+      qi("Agent_Reference"),
+      qi("Featured_Agent"),
+      qi("Identity_Verification_Status"),
+      qi("Verification_Fee_Active"),
+      qi("Specialist_Vocation"),
+      qi("Public_WhatsApp"),
+      qi("Public_Email"),
       qi("Created"),
       qi("Updated"),
     ].join(", ") +
