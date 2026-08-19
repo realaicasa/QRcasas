@@ -25,30 +25,35 @@
 - Run `npm run typecheck`, `npm test`, and `npm run build` after material changes.
 - Do not claim production behavior without checking deployment state or logs.
 
-## 4. Payment Authority
-- The Stripe webhook (`/api/stripe/webhook`) is the **sole payment authority**.
-- The success URL (`/account/properties?paid=1&session_id=…`) is **read-only** — it displays banners but never writes entitlements.
-- The webhook verifies: signature, `payment_status=paid`, `currency=mxn`, `amount_total === expectedTotal * 100` (minor units), metadata matches the live renewal record, renewal `Stripe_Checkout_Session_ID` matches.
-- Only after all checks pass: mark renewal `Status=Paid` + `Paid_At`, set `Properties.Photo_Package=Paid` on the exact upgraded properties.
+## 4. Client/Server Component Boundary
+- **NEVER** pass non-serializable values (functions, class instances) from Server Components to Client Components.
+- The `t` translation function must NOT be passed as a prop. Instead, pass `locale` (string) and create `t` inside the client component:
+  `const t = (en: string, es: string) => (locale === "es" ? es : en);`
+- This was the root cause of multiple production 500 errors (blank pages).
 
-## 5. Stripe Configuration (LIVE)
+## 5. Payment Authority
+- The Stripe webhook (`/api/stripe/webhook`) is the **sole payment authority**.
+- The success URL is **read-only** — displays banners but never writes entitlements.
+- Webhook verifies: signature, `payment_status=paid`, `currency=mxn`, `amount_total === expectedTotal * 100` (minor units), metadata matches live renewal record.
+- After verification: marks renewal `Status=Paid`, sets `Photo_Package=Paid`.
+- For sponsor subscriptions: `customer.subscription.updated` (active) → `Billing_Status=Active, Approved=true`; (past_due/canceled) → `Billing_Status=Past Due/Cancelled, Approved=false`.
+
+## 6. Stripe Configuration (LIVE — all env vars set in Vercel)
 - `STRIPE_SECRET_KEY` = `rk_live_51MvrBt…` (restricted key — **must be rotated**)
 - `STRIPE_PRICE_SINGLE_PROPERTY` = `price_1U5Wy6Ge9hhLYer6Yrs9Joal` (500 MXN one-time)
 - `STRIPE_PRICE_UP_TO_10` = `price_1U5XNJGe9hhLYer6uIsCWO08` (3,000 MXN one-time)
 - `STRIPE_PRICE_UP_TO_25` = `price_1U5XPLGe9hhLYer6dMypHsFt` (6,900 MXN one-time)
 - `STRIPE_WEBHOOK_SECRET` = `whsec_3E9jO58qNbAsdC9K0Bg4cZSeBszezZ3D`
 - Webhook endpoint: `https://qrcasas.com/api/stripe/webhook` (ID: `we_1U5ZAkGe9hhLYer61iUulLAw`)
-- Events: `checkout.session.completed`, `checkout.session.async_payment_succeeded`
-- Photo add-on: 200 MXN per property, inline `price_data` line item — no separate Price ID
-- All 5 env vars are set in Vercel Production
+- Events configured: `checkout.session.completed`, `checkout.session.async_payment_succeeded`
+- Events **still needed**: `customer.subscription.updated`, `customer.subscription.deleted`
+- Photo add-on: 200 MXN per property, inline `price_data` — no separate Price ID
+- Agent upsells: 300 MXN/mo each (verified + featured) — recurring subscription
+- Sponsor: 1,200 MXN/mo recurring — inline `price_data`
 
-## 6. Agent Upsell Pricing (NOT yet wired to Stripe)
-- Verified Agent: 300 MXN/month recurring — blue tick + proof of ID
-- Featured Agent: 300 MXN/month recurring — featured in directory horizontal scroll
-- These need Stripe recurring subscription integration (not yet implemented in this checkout)
-
-## 7. Canonical Workspace Divergence
-- Commits `5e8bb9e`, `e5922a2`, `d94058f`, `a58c60a`, `5a94793`, `7c3a788` exist ONLY in the Teable agent's workspace — NOT on `origin/main`.
-- This checkout has parallel implementations created from scratch.
-- The Teable agent's workspace has: auto-advancing featured rails, QR downloads, contact analytics, agent portfolios, recurring Stripe subscriptions, Stripe Customer Portal.
-- This checkout has: static featured scroll with arrows, Stripe one-time checkout + webhook, agent upsell checkboxes (UI only, not yet linked to Stripe recurring).
+## 7. Architecture Notes
+- lucide-react v1.28.0 has NO brand icons (Instagram, Facebook, Linkedin) — use Globe
+- `src/lib/media.ts` provides safe image extraction with placeholder fallback
+- QR codes use `api.qrserver.com` external API (1024x1024 PNG, high error correction)
+- npm commands (not pnpm): `npm run typecheck`, `npm test`, `npm run build`
+- Super-admin access: `realai.agency@gmail.com` or `mike@dynamicmike.com`
