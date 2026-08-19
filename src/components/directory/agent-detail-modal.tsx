@@ -9,9 +9,10 @@ import type { Locale } from "@/lib/i18n";
 interface AgentDetailModalProps {
   agent: AgentProfile;
   locale: Locale;
+  isLoggedIn: boolean;
 }
 
-export default function AgentDetailModal({ agent, locale }: AgentDetailModalProps) {
+export default function AgentDetailModal({ agent, locale, isLoggedIn }: AgentDetailModalProps) {
   const t = (en: string, es: string) => (locale === "es" ? es : en);
   const [open, setOpen] = useState(false);
 
@@ -20,7 +21,7 @@ export default function AgentDetailModal({ agent, locale }: AgentDetailModalProp
   }, []);
 
   useEffect(() => {
-    if (!open) return;
+    if (!open || !isLoggedIn) return;
     const visitorId = sessionStorage.getItem("qrcasas_visitor") || `anon-${Date.now()}`;
     sessionStorage.setItem("qrcasas_visitor", visitorId);
     fetch("/api/activity", {
@@ -33,7 +34,7 @@ export default function AgentDetailModal({ agent, locale }: AgentDetailModalProp
         language: locale,
       }),
     }).catch(() => {});
-  }, [open, agent.id, locale]);
+  }, [open, agent.id, locale, isLoggedIn]);
 
   const photoUrl = agent.profilePhoto?.url || agent.logoImage?.url;
   const displayName = agent.displayName;
@@ -179,37 +180,54 @@ export default function AgentDetailModal({ agent, locale }: AgentDetailModalProp
                   <h3 className="mb-2 text-sm font-semibold">
                     {t("Contact", "Contacto")}
                   </h3>
-                  <div className="space-y-2">
-                    {contactItems.length > 0 ? (
-                      contactItems.map((item, i) => {
-                        const Icon = item.icon;
-                        return (
-                          <div key={i} className="flex items-center gap-2 text-sm">
-                            <Icon className="size-4 shrink-0 text-muted-foreground" />
-                            {item.href ? (
-                              <a
-                                href={item.href}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-primary hover:underline"
-                              >
-                                {item.value}
-                              </a>
-                            ) : (
-                              <span>{item.value}</span>
-                            )}
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <p className="text-sm text-muted-foreground">
+                  {isLoggedIn ? (
+                    <div className="space-y-2">
+                      {contactItems.length > 0 ? (
+                        contactItems.map((item, i) => {
+                          const Icon = item.icon;
+                          return (
+                            <div key={i} className="flex items-center gap-2 text-sm">
+                              <Icon className="size-4 shrink-0 text-muted-foreground" />
+                              {item.href ? (
+                                <a
+                                  href={item.href}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary hover:underline"
+                                >
+                                  {item.value}
+                                </a>
+                              ) : (
+                                <span>{item.value}</span>
+                              )}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <p className="text-sm text-muted-foreground">
+                          {t(
+                            "No contact information available.",
+                            "Sin información de contacto disponible."
+                          )}
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-lg border border-border bg-muted/50 p-4 text-center">
+                      <p className="text-sm text-muted-foreground mb-3">
                         {t(
-                          "No contact information available.",
-                          "Sin información de contacto disponible."
+                          "Sign in to reveal contact details",
+                          "Inicia sesión para ver los datos de contacto"
                         )}
                       </p>
-                    )}
-                  </div>
+                      <a
+                        href={`/${locale}/login?next=/${locale}/directory/${agent.id}`}
+                        className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-colors hover:bg-primary/90"
+                      >
+                        {t("Sign In", "Iniciar Sesión")}
+                      </a>
+                    </div>
+                  )}
                 </div>
 
                 {/* Back link */}

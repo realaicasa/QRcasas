@@ -50,6 +50,8 @@ export default async function AgentProfilePage({
     notFound();
   }
 
+  const isLoggedIn = Boolean(session);
+
   const jsonLd: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "RealEstateAgent",
@@ -71,7 +73,7 @@ export default async function AgentProfilePage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <AgentDetailModal agent={agent} locale={locale} />
+      <AgentDetailModal agent={agent} locale={locale} isLoggedIn={isLoggedIn} />
     </>
   );
 }

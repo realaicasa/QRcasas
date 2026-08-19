@@ -1,7 +1,8 @@
 import Link from "next/link";
 import type { Locale } from "@/lib/i18n";
 import type { PropertyListItem } from "@/lib/data/property";
-import { MapPin, BedDouble, Bath, Maximize } from "lucide-react";
+import { MapPin, BedDouble, Bath, Maximize, ImageIcon } from "lucide-react";
+import { getFirstSafeImage } from "@/lib/media";
 
 function formatPrice(price: number | null, currency: string | null, locale: Locale): string {
   if (price == null) return locale === "es" ? "Precio bajo petición" : "Price on request";
@@ -39,7 +40,8 @@ interface PropertyCardProps {
 }
 
 export default function PropertyCard({ property, locale, t }: PropertyCardProps) {
-  const primaryPhoto = property.photos[0]?.signedUrl ?? property.photos[0]?.url;
+  const primaryPhoto = getFirstSafeImage(property.photos);
+  const hasRealPhoto = property.photos.length > 0 && (property.photos[0]?.signedUrl ?? property.photos[0]?.url);
   const isRental = property.listingType === "Rental" || property.listingType === "Renta";
   const lastUpdated = formatDate(property.updatedAt, locale);
 
@@ -49,7 +51,7 @@ export default function PropertyCard({ property, locale, t }: PropertyCardProps)
       className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card text-card-foreground shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
     >
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
-        {primaryPhoto ? (
+        {hasRealPhoto ? (
           <img
             src={primaryPhoto}
             alt={property.photoAltText[0] || property.title}

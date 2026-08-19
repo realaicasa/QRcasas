@@ -6,6 +6,7 @@ import { getPublicPropertyBySlug, resolveSeoTitle, resolveSeoDescription } from 
 import { ArrowLeft, MapPin, BedDouble, Bath, Maximize, Home, Share2, Wifi, Armchair, Shield, Clock } from "lucide-react";
 import { getCustomerAuth } from "@/lib/customer-auth";
 import { absoluteUrl } from "@/lib/request";
+import { getFirstSafeImage, getSafeImageList } from "@/lib/media";
 import EnquiryForm from "@/components/properties/enquiry-form";
 import ContactDetailsModal from "@/components/properties/contact-details-modal";
 import QrCodeDisplay from "@/components/shared/qr-code-display";
@@ -103,8 +104,9 @@ export default async function PropertyPage({
   }
   const { property, advertiser, locationLabels } = result;
 
-  const photos = property.photos.filter((p) => p.signedUrl ?? p.url);
-  const primaryPhoto = photos[0]?.signedUrl ?? photos[0]?.url;
+  const photos = getSafeImageList(property.photos);
+  const primaryPhoto = getFirstSafeImage(property.photos);
+  const hasRealPhotos = property.photos.length > 0;
 
   const amenities = [
     property.wifi && <FeatureRow key="wifi" icon={Wifi} label={t("Wi-Fi", "Wi-Fi")} />,
