@@ -113,9 +113,7 @@ export async function getUserByEmail(email: string): Promise<UserRecord | null> 
     qi("Email") +
     " = " +
     lit(email) +
-    " AND " +
-    qi("Is_Verified") +
-    " IS TRUE";
+    " LIMIT 1";
   const rows = await client.runSql<SqlRow>(sql);
   return rows.length > 0 ? parseUserRow(rows[0]) : null;
 }

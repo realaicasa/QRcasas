@@ -8,7 +8,7 @@ export async function getCustomerAuth(cookieValue?: string) {
     sessionCookie = cookieValue;
   } else {
     const cookieStore = await cookies();
-    sessionCookie = cookieStore.get("session")?.value;
+    sessionCookie = cookieStore.get("qrcasas_session")?.value ?? cookieStore.get("session")?.value;
   }
 
   if (!sessionCookie) {

@@ -5,7 +5,7 @@ import { getCustomerAuth } from "@/lib/customer-auth";
 import { getAgentByUserId } from "@/lib/data/agents";
 import { getPropertyById, updateProperty } from "@/lib/data/property";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
-import PropertyForm from "@/components/properties/property-form";
+import PropertyEditFlow from "@/components/properties/property-edit-flow";
 import type { PropertyFormData } from "@/components/properties/property-form";
 import { getLocationsByType } from "@/lib/data/locations";
 
@@ -45,7 +45,6 @@ export default async function EditPropertyPage({ params }: PageProps) {
     redirect(`/${locale}/account/properties`);
   }
 
-  // Ensure the agent owns this property
   if (property.clientId !== agent.id) {
     redirect(`/${locale}/account/properties`);
   }
@@ -66,13 +65,13 @@ export default async function EditPropertyPage({ params }: PageProps) {
       currency: data.currency || null,
       listingType: data.listingType || null,
       listingTerm: data.listingTerm || null,
-       bedrooms: data.bedrooms ? (data.bedrooms === "Studio" ? 0 : Number(data.bedrooms.replace("+", ""))) : null,
+      bedrooms: data.bedrooms ? (data.bedrooms === "Studio" ? 0 : Number(data.bedrooms.replace("+", ""))) : null,
       bathrooms: data.bathrooms ? Number(data.bathrooms) : null,
       interiorArea: data.interiorArea ? Number(data.interiorArea) : null,
       areaUnit: data.areaUnit || null,
-       publicLocation: data.publicLocation || null,
-       latitude: data.latitude ? Number(data.latitude) : null,
-       longitude: data.longitude ? Number(data.longitude) : null,
+      publicLocation: data.publicLocation || null,
+      latitude: data.latitude ? Number(data.latitude) : null,
+      longitude: data.longitude ? Number(data.longitude) : null,
       petFriendly: data.petFriendly,
       parking: data.parking,
       nearShopping: data.nearShopping,
@@ -103,7 +102,7 @@ export default async function EditPropertyPage({ params }: PageProps) {
       <h1 className="text-2xl font-bold tracking-tight mb-6">
         {t("Edit Property", "Editar Propiedad")}
       </h1>
-      <PropertyForm
+      <PropertyEditFlow
         locale={locale}
         property={property}
         tierLevel={agent.tierLevel}

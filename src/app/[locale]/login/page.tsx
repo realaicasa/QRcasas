@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
+import { getUserByEmail } from "@/lib/data/users";
 import LoginForm from "@/components/auth/login-form";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -32,6 +33,10 @@ export default async function LoginPage({
     const password = String(formData.get("password") ?? "");
     if (!email || !password) {
       return;
+    }
+    const user = await getUserByEmail(email);
+    if (!user) {
+      redirect(`/${locale}/login?error=notfound&next=${encodeURIComponent(destination)}`);
     }
     const store = await cookies();
     store.set("qrcasas_session", email, {
