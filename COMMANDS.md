@@ -3,35 +3,41 @@
 ## Initialize
 "Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Check git status, current branch, recent commits, and the Vercel deployment commit before changing code."
 
-## Stripe Webhook Events (user action required)
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Remind the user to add customer.subscription.updated and customer.subscription.deleted events to the Stripe webhook endpoint at https://qrcasas.com/api/stripe/webhook. Without these, recurring subscription status changes (agent upsells + sponsors) won't update Teable."
+## Image Upload Debug
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. The session cookie mismatch was fixed (getCustomerAuth now reads qrcasas_session first). Test image upload on live deploy: log in, edit profile, upload photo/logo, verify it appears. If still failing, check Vercel function logs for /api/uploads/attachment errors. The upload route uses sharp for WebP conversion and posts to Teable uploadAttachment endpoint."
 
-## Stripe End-to-End Test
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. All Stripe env vars are configured in Vercel. Test a live-mode purchase: log in as agent, create a property, select a tier, complete Stripe checkout, confirm the webhook fires and marks the renewal Paid and sets Photo_Package=Paid. Then test a sponsor registration and subscription. Report any failures."
+## Property Detail Page Debug
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. The non-serializable t function was removed from all client component props. Test the property detail page on live deploy — visit /en/properties/mike-test-property and verify it renders. If still blank, check Vercel logs for Server Components render errors."
+
+## Login Session Debug
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. getUserByEmail no longer filters by Is_Verified IS TRUE. Test login with a different account — verify the correct agent profile loads. If the second account doesn't exist in Teable, the user needs to register first at /directory/register."
+
+## Pro/Pro Plus Upgrade Setup
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. The user needs to create Stripe Price IDs for Pro and Pro Plus monthly subscriptions. Once provided, wire the checkout flow: agent clicks upgrade → Stripe subscription checkout → webhook sets Directory_Tier to Pro or Pro Plus. Pro tier: custom SEO, more properties. Pro Plus: full SEO, max properties, featured eligibility."
+
+## Verified ID Upload to Advertiser Verifications
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. When an agent requests verification and uploads proof of ID, the file should be saved to the Advertiser Verifications table (tblVYj7pAh9OMcDAA08), not the agent record. Also notify super-admin. Check the live Teable fields for Advertiser Verifications and wire the upload accordingly."
 
 ## Sponsor Carousel
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Add a sponsor carousel section to the homepage that displays active sponsor adverts (Billing_Status=Active, Approved=true) from the Business Adverts table. Use the getActiveSponsorAdverts function. Show advert image, title, and clickable link to destination URL. Match the featured rails styling."
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Add a sponsor carousel section to the homepage that displays active sponsor adverts (Billing_Status=Active, Approved=true) from the Business Adverts table. Use getActiveSponsorAdverts. Show advert image, title, and clickable link. Match the featured rails styling."
 
 ## Stripe Customer Portal
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Add a Stripe Customer Portal integration so subscribers (agents with verified/featured upsells and sponsors) can manage their billing, update payment methods, and cancel subscriptions. Create a billing portal route that redirects to Stripe's hosted portal."
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Add Stripe Customer Portal integration so subscribers can manage billing, update payment methods, and cancel subscriptions. Create a billing portal route that redirects to Stripe's hosted portal."
 
-## Upload Real Inventory
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. The current test properties have no photo attachments. Upload real property photos to the existing test properties in Teable so the property cards, detail pages, and QR codes display correctly. Verify the media fallback helper handles any remaining gaps."
-
-## Property Image Debug
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Investigate why property images show placeholders in search results. Check the getPublicProperties SQL query includes Photos field, check Teable attachment signed URL response, verify getFirstSafeImage extracts URLs correctly. Fix the root cause."
+## Stripe End-to-End Test
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. All Stripe env vars are configured. Test: (1) one-time listing payment, (2) recurring agent upsell, (3) recurring sponsor subscription. Verify webhooks fire and update Teable correctly."
 
 ## Security Rotation
 "Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Rotate the exposed GitHub PAT, Teable PAT, and Stripe restricted key. Update Vercel Production variables without printing secrets. Verify the deployed commit and confirm the working tree is clean."
 
 ## Teable Verification
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Verify Teable reads using environment variables only. Confirm TEABLE_API_URL resolves to https://app.teable.ai/api, never print TEABLE_API_TOKEN, and do not perform writes without reading the existing record first."
-
-## Agent Upsell Debug
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Test the agent upsell flow: edit profile, check Verified or Featured checkbox, save, verify redirect to Stripe subscription checkout, complete payment, confirm webhook sets Verification_Fee_Active=true or Featured_Agent=true. Report any failures."
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Verify Teable reads using environment variables only. Confirm TEABLE_API_URL resolves to https://app.teable.ai/api, never print TEABLE_API_TOKEN."
 
 ## PR / Deployment Check
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Inspect git status, git diff, git log --oneline -10, and origin tracking. Run npm run typecheck, npm test, and npm run build. Push only the intended changes to main (using realaicasa PAT if dynamicmike-dashboard is denied) and report the commit hash."
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Inspect git status, git diff, git log --oneline -10, and origin tracking. Run npm run typecheck, npm test, and npm run build. Push only intended changes to main (using realaicasa PAT if denied) and report the commit hash."
 
-## Super-admin Dashboard Enhancement
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Add the ability to approve or reject identity verifications from the super-admin dashboard pending review queue. Include a button to set Identity_Verification_Status to Verified or Rejected, and a button to toggle Featured_Agent manually."
+## Super-admin Enhancement
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Add ability to approve/reject identity verifications from the super-admin dashboard. Include buttons to set Identity_Verification_Status to Verified or Rejected, and toggle Featured_Agent manually."
+
+## Upload Real Inventory
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Upload real property photos to test properties in Teable so cards, detail pages, and QR codes display correctly. Verify the media fallback helper handles gaps."

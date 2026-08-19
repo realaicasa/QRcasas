@@ -1,17 +1,16 @@
 # QRcasas Project Manifest
 
 ## Status
-- Current goal: Production launch — all monetization paths wired, testing + credential rotation remaining.
-- Last session date: 2026-08-18.
+- Current goal: Production launch — fix remaining image upload/display issues, wire Pro/Pro Plus upgrades, test end-to-end.
+- Last session date: 2026-08-19.
 - Current branch: `main`.
-- Current commit: `774748ac` (Add agent portfolio section with #portfolio anchor).
+- Current commit: `588e8250` (Fix session cookie, login verification, property edit photo upload).
 - Working tree: clean; `main` is pushed to `origin/main`.
 
 ## System State
 - Project root: `F:\Mike d drive\Mike Webs\mAIstermind.com\projects\QRCasas\QRcasas-github`.
 - Production URLs: `https://qrcasas.com/`, `https://qrcasas.vercel.app/`.
 - GitHub: `https://github.com/realaicasa/QRcasas.git` (push via `realaicasa` PAT).
-- Deployment source: GitHub `main` branch via Vercel.
 - Teable base: `bseR9OOCC0f7fvY1d0z`.
 - Teable API endpoint: `https://app.teable.ai/api`.
 - Super-admin access: `realai.agency@gmail.com` or `mike@dynamicmike.com`.
@@ -20,6 +19,7 @@
 - `TEABLE_API_URL`, `TEABLE_API_TOKEN`
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`
 - `STRIPE_PRICE_SINGLE_PROPERTY`, `STRIPE_PRICE_UP_TO_10`, `STRIPE_PRICE_UP_TO_25`
+- `SITE_URL=https://qrcasas.com`
 
 ## Teable Tables (live)
 - Portal Users: `tbl394RbduZlmHUni8e`
@@ -32,95 +32,93 @@
 - Business Adverts: `tbln1kaLnMBM9jlgyV8`
 - Directory Subscriptions: `tblIk58JzxlY532W6A0`
 - Advertiser Verifications: `tblVYj7pAh9OMcDAA08`
-- Field maps in `src/lib/data/teable/fields.generated.ts`, table IDs in `tables.ts`.
 
-## Implemented (full session — commits c175737e → 774748ac)
+## Key Fixes Applied This Session
+- **Session cookie mismatch**: `getCustomerAuth()` now reads `qrcasas_session` first, then `session` fallback. This was breaking all upload authentication.
+- **Login user verification**: login form now checks if user exists in Teable before setting cookie. Removed `Is_Verified IS TRUE` filter from `getUserByEmail`.
+- **Property edit photo upload**: created `PropertyEditFlow` client component that uploads photos after save (same pattern as create flow).
+- **Upload buttons styled**: profile photo, logo, property photos now use styled "Choose Photo" buttons with upload icon.
+- **Alt text optional**: removed `required` from alt text input.
+- **Agent SEO text**: changed placeholders from property examples to agent examples.
+- **Removed "Save SEO Settings" button**: SEO fields feed into main "Update Profile" button.
+- **Featured redirect to Stripe**: server action returns checkout flag, client-side handles Stripe redirect.
+- **Current profile images shown**: agent form displays existing photo/logo with green label.
+- **Upload error display**: red error / green success messages.
+- **Redundant footer CTA removed**: large "Add Property" button removed from footer.
+- **Pricing modal close fixed**: stopPropagation on X and Cancel buttons.
 
+## Still Broken / Needs Investigation
+- **Images not displaying after upload**: Upload may still be failing. The session cookie fix should help, but needs live testing. Check Vercel function logs for `/api/uploads/attachment` errors.
+- **Property detail page may still be blank**: Previous `t={t}` fix should have resolved this, but needs verification on live deploy.
+- **Login still routing to wrong account**: The `getUserByEmail` fix removes `Is_Verified` filter, but the second account may not exist in Teable at all (register flow needed).
+
+## Implemented (full session — all commits)
 ### Branding & PWA
-- Logo, favicon, PWA manifest icons updated to CDN URLs (header, footer, manifest, layout)
+- Logo, favicon, PWA manifest icons (CDN URLs)
 
-### Stripe Payment Integration (one-time listings)
-- `src/lib/stripe.ts` — raw-fetch Stripe API helpers (no npm package), HMAC webhook verify
-- `src/lib/data/renewals.ts` — renewal data layer
-- `/api/stripe/checkout` — auth-gated, creates Pending renewal + Checkout Session with metadata
-- `/api/stripe/webhook` — sole payment authority, strict verification (signature, paid, mxn, amount_total in minor units, metadata cross-check)
-- Payment banners on `/account/properties` (verified/verifying/cancelled — read-only)
-- Property create flow: uploads first photo, calls checkout, redirects to Stripe
-
-### Stripe Recurring Subscriptions (agent upsells + sponsors)
-- `/api/stripe/subscription` — 300 MXN/mo recurring for Verified + Featured agent upsells
-- `/api/stripe/sponsor-checkout` — 1,200 MXN/mo recurring for sponsor adverts
-- Webhook handles: `checkout.session.completed`, `customer.subscription.updated`, `customer.subscription.deleted`
-- Agent upsell: Verified → `Identity_Verification_Status=Pending Review, Verification_Fee_Active=true`; Featured → `Featured_Agent=true`
-- Sponsor: Active subscription → `Billing_Status=Active, Approved=true`; Cancelled → `Billing_Status=Cancelled, Approved=false`
+### Stripe Payments
+- One-time listing payments (checkout + webhook + renewal records)
+- Recurring agent upsells (300 MXN/mo verified + featured)
+- Recurring sponsor subscriptions (1,200 MXN/mo)
+- Payment banners on dashboard (read-only)
+- Webhook handles: checkout.session.completed, async_payment_succeeded, customer.subscription.updated, customer.subscription.deleted
 
 ### Properties Page
-- Search/Latest toggle buttons (filters hidden by default)
-- Featured properties horizontal scroll with auto-advance (8s, pause on hover/focus, section search, arrow nav)
-- Marketplace notice (shield icon) + "Advertise with QRcasas" sections at bottom
-- Sponsor modal (purple button) replaces "Real Estate Agents" button
+- Search/Latest toggle, filters hidden by default
+- Featured auto-scroll rails (8s, pause on hover, section search, arrow nav)
+- Marketplace notice + "Advertise with QRcasas" sections
+- Sponsor modal (purple button)
 
 ### Directory Page
-- Simplified agent cards (display name, business name, profile photo, verified tick, specialty)
-- Search/Latest toggle, featured agents horizontal scroll with auto-advance
-- Same bottom sections as properties page
+- Simplified cards (display name, business name, photo, verified tick, specialty)
+- Search/Latest toggle, featured auto-scroll rails
+- Same bottom sections
 
 ### Agent Detail
-- Fixed blank page (Next.js 16 Promise params + non-serializable `t` function removed)
-- `AgentDetailModal` — auto-opens, shows photo, name, business, bio, specialist, agent reference, verified tick
-- Sign-in gate: contact info hidden for signed-out visitors, shows "Sign In" CTA
-- "View Portfolio" link scrolls to `#portfolio` section
-- Portfolio section: grid of published properties with safe image fallback
+- Modal with sign-in gate on contact info
+- Portfolio section with #portfolio anchor
+- "View Portfolio" link in modal
 
 ### Agent Profile
-- `AgentProfile` expanded: displayName, tagline, agentReference, featuredAgent, identityVerificationStatus, verificationFeeActive, specialistVocation, publicWhatsApp, publicEmail
-- Agent form: display name, tagline, specialism dropdown, public contact fields, agent ID reference (read-only), verified upsell (300 MXN/mo + proof-of-ID upload), featured upsell (300 MXN/mo)
-- Auto-generated agent reference (`QRC-XXXXXX`) on `createAgent`
+- Expanded fields: displayName, tagline, agentReference, featuredAgent, identityVerificationStatus, specialistVocation, publicWhatsApp, publicEmail
+- Upsell checkboxes: Verified (300 MXN/mo + proof-of-ID upload), Featured (300 MXN/mo)
+- Auto-generated agent reference (QRC-XXXXXX) on creation
+- Upload buttons styled, current images shown
+- SEO text corrected for agent context
 
 ### Super-admin Dashboard
-- Stats: total agents, verified, pending review, featured
-- Pending verification queue
-- Searchable agent table (by name, business, agent ID, specialty) with photo, tier badge, status
+- Stats, pending verifications, searchable agent table
 
 ### QR Codes
-- `QrCodeDisplay` component — 1024x1024 PNG, high error correction, download/copy/open
-- Property QR: `/properties/{slug}?source=qr`
-- Agent QR: `/realtors/{slug}?source=qr&contact=1`
+- 1024px PNG downloads for properties and agents
 
 ### Contact Analytics
-- `Agent Contact Modal Opened` event in Property Activity table with Advertiser link
-- 5-second deduplication
-- Dashboard shows all-time + current-month contact opens
-- Only signed-in reveals are counted
+- Agent Contact Modal Opened event, 5s dedup, dashboard metrics
 
 ### Sponsor Flow
-- `/sponsors/register` — form (personal name, business, address, contact, advert title/description, link)
-- `/sponsors/dashboard` — status, create new advert
-- `/api/sponsors/create` — creates Sponsor Account + Business Advert (Inactive/Draft)
-- `/api/stripe/sponsor-checkout` — 1,200 MXN/mo recurring checkout
-- Webhook activates/pauses advert based on subscription status
-- `getActiveSponsorAdverts()` — requires `Billing_Status=Active AND Approved=true`
+- Registration, dashboard, Stripe 1,200 MXN/mo checkout, webhook activation
 
 ### Media Safety
-- `src/lib/media.ts` — `getSafeImageUrl`, `getSafeImageList`, `getFirstSafeImage`
-- Bad/stale Teable attachments render placeholder, no page crashes
+- `src/lib/media.ts` — placeholder fallback, no crashes
 
-### Header/Footer
-- Header: "Properties Directory" / "Agents Directory"
-- Footer: single "Add Property" CTA (removed redundant "Agent Login")
+## Pro / Pro Plus Tier Upgrades (NOT yet wired)
+- Free: Basic profile, 1 property, no SEO
+- Pro: Custom SEO, more properties — no Stripe Price ID exists
+- Pro Plus: Full SEO, max properties, featured eligibility — no Stripe Price ID exists
+- User needs to create Stripe Prices for Pro and Pro Plus monthly subscriptions before I can wire the checkout
 
 ## Security Status
-- GitHub PAT (`ghp_…`), Teable PAT (`teable_…`), Stripe restricted key (`rk_live_…`) all exposed in chat — **must be rotated**.
-- Do not merge application-owned password hashing or password-reset code.
+- GitHub PAT, Teable PAT, Stripe restricted key all exposed in chat — **must be rotated**.
 
 ## Pending / Next
-- [ ] **Add `customer.subscription.updated` + `customer.subscription.deleted` to Stripe webhook endpoint** (dashboard action)
-- [ ] **Rotate exposed credentials**: GitHub PAT, Teable PAT, Stripe rk_live key
-- [ ] Test Stripe end-to-end: one-time listing payment → webhook → Paid → Photo_Package=Paid
-- [ ] Test sponsor flow: register → upload creative → start subscription → webhook → advert live
-- [ ] Test agent upsell: check verified/featured → subscription checkout → webhook → entitlements
-- [ ] Upload real property inventory with photos (current test properties have no photos)
-- [ ] Sponsor carousel on homepage (display active sponsor adverts)
-- [ ] Stripe Customer Portal for subscribers to manage/cancel billing
-- [ ] Onboard first test sponsor
-- [ ] Do not recreate the five removed duplicate lifecycle fields
+- [ ] **Test image upload on live deploy** — session cookie fix should resolve, needs verification
+- [ ] **Test property detail page** — should no longer be blank after `t={t}` fix
+- [ ] **Create Pro/Pro Plus Stripe Price IDs** — user needs to create these in Stripe dashboard
+- [ ] **Wire Pro/Pro Plus upgrade checkout** — once Price IDs exist
+- [ ] **Save verified ID upload to Advertiser Verifications table** — currently uploads to agent record, should go to separate table + notify super-admin
+- [ ] **Test Stripe end-to-end** — one-time listing payment, recurring agent upsell, recurring sponsor
+- [ ] **Upload real property photos** — current test properties have no photos
+- [ ] **Sponsor carousel on homepage** — display active sponsor adverts
+- [ ] **Stripe Customer Portal** — for subscribers to manage/cancel billing
+- [ ] **Rotate exposed credentials** — GitHub PAT, Teable PAT, Stripe rk_live key
+- [ ] **Onboard first test sponsor**
