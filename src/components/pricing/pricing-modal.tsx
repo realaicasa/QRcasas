@@ -105,7 +105,7 @@ export default function PricingModal({ locale, onSelect, onClose }: PricingModal
           </div>
           <button
             type="button"
-            onClick={onClose}
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
             aria-label="Close"
             className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
           >
@@ -184,7 +184,7 @@ export default function PricingModal({ locale, onSelect, onClose }: PricingModal
         <div className="mt-6 flex justify-end gap-3">
           <button
             type="button"
-            onClick={onClose}
+            onClick={(e) => { e.stopPropagation(); onClose(); }}
             className="rounded-lg border border-border px-5 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
             {t("cancel")}

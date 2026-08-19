@@ -172,31 +172,6 @@ export default function SiteFooter({ locale, session }: SiteFooterProps) {
   return (
     <>
       <footer className="border-t border-border bg-sand/50">
-        {/* Primary CTA Buttons - Dominant section taking most of footer space */}
-        <div className="border-b border-border/60 bg-hero">
-          <div className="mx-auto w-full px-4 py-20 sm:px-6">
-            <div className="flex flex-col gap-8 sm:flex-row sm:items-center sm:justify-center">
-              {isLoggedIn ? (
-                <Link
-                  href={`/${locale}/account/properties/new`}
-                  className="flex-1 flex items-center justify-center gap-4 rounded-xl bg-primary px-10 py-6 text-lg font-bold text-primary-foreground shadow-lg transition-colors hover:bg-primary-dark w-full sm:w-auto"
-                >
-                  <Tag className="size-6" />
-                  <span>{t("addProperty")}</span>
-                </Link>
-              ) : (
-                <Link
-                  href={`/${locale}/login?next=/${locale}/account/properties/new`}
-                  className="flex-1 flex items-center justify-center gap-4 rounded-xl bg-primary px-10 py-6 text-lg font-bold text-primary-foreground shadow-lg transition-colors hover:bg-primary-dark w-full sm:w-auto"
-                >
-                  <Tag className="size-6" />
-                  <span>{t("addProperty")}</span>
-                </Link>
-              )}
-            </div>
-          </div>
-        </div>
-
         {/* Minimal footer links below */}
         <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center text-sm text-muted-foreground">
