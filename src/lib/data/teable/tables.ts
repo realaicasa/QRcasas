@@ -9,6 +9,9 @@ export const DB_TABLES = {
   Property_Favorites: "tbl09wm59D1Z6vnm3Yh",
   Property_Watchlists: "tbl0LyK3gP4WpYFJE9z",
   ListingRenewals: "tbl7XnhLXWvbRJXXh6L",
+  SponsorAccounts: "tbliuwzQOgnEFQNqxj9",
+  BusinessAdverts: "tbln1kaLnMBM9jlgyV8",
+  DirectorySubscriptions: "tblIk58JzxlY532W6A0",
 };
 
 export const TABLES = DB_TABLES;

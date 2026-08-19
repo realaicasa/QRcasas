@@ -4,19 +4,19 @@ import { getTeableConfig, TeableClient, type SqlRow, qiTable, linkId } from "./t
 import { lit, qi } from "./teable/sql";
 import { TABLES } from "./teable/tables";
 import { TAGS, invalidate } from "./cache";
+import { getFirstSafeImage } from "@/lib/media";
 
 export interface SponsorAdvert {
   id: string;
-  sponsorName: string;
-  businessName: string;
-  businessAddress: string;
-  contactInfo: string;
   advertTitle: string;
-  advertDescription: string;
-  imageUrl: string | null;
-  linkUrl: string;
+  businessName: string;
+  offer: string;
+  imageUrl: string;
+  destinationUrl: string;
   billingStatus: string;
   monthlyAmount: number;
+  approved: boolean;
+  status: string;
   stripeCheckoutSessionId: string | null;
   stripeSubscriptionId: string | null;
   stripeCustomerId: string | null;
@@ -27,16 +27,15 @@ export interface SponsorAdvert {
 function parseAdvertRow(row: SqlRow, id: string): SponsorAdvert {
   return {
     id,
-    sponsorName: String(row.Sponsor_Name ?? ""),
+    advertTitle: String(row.Advert ?? ""),
     businessName: String(row.Business_Name ?? ""),
-    businessAddress: String(row.Business_Address ?? ""),
-    contactInfo: String(row.Contact_Info ?? ""),
-    advertTitle: String(row.Advert_Title ?? ""),
-    advertDescription: String(row.Advert_Description ?? ""),
-    imageUrl: row.Advert_Image ? String(row.Advert_Image) : null,
-    linkUrl: String(row.Link_URL ?? ""),
+    offer: String(row.Offer ?? ""),
+    imageUrl: getFirstSafeImage(row.Creative),
+    destinationUrl: String(row.Destination_URL ?? ""),
     billingStatus: String(row.Billing_Status ?? "Inactive"),
-    monthlyAmount: Number(row.Monthly_Amount ?? 0),
+    monthlyAmount: Number(row.Monthly_Amount_MXN ?? 0),
+    approved: row.Approved === true,
+    status: String(row.Status ?? ""),
     stripeCheckoutSessionId: row.Stripe_Checkout_Session_ID ? String(row.Stripe_Checkout_Session_ID) : null,
     stripeSubscriptionId: row.Stripe_Subscription_ID ? String(row.Stripe_Subscription_ID) : null,
     stripeCustomerId: row.Stripe_Customer_ID ? String(row.Stripe_Customer_ID) : null,
@@ -46,40 +45,55 @@ function parseAdvertRow(row: SqlRow, id: string): SponsorAdvert {
 }
 
 export async function createSponsorAdvert(data: {
-  sponsorName: string;
+  contactName: string;
   businessName: string;
   businessAddress: string;
   contactInfo: string;
   advertTitle: string;
   advertDescription: string;
   linkUrl: string;
+  userId?: string;
+  email?: string;
 }): Promise<string> {
   const client = new TeableClient(getTeableConfig());
-  const record = await client.createRecord("Sponsor_Adverts", {
-    Sponsor_Name: data.sponsorName,
+
+  const sponsorAccount = await client.createRecord(TABLES.SponsorAccounts, {
+    Contact_Name: data.contactName,
     Business_Name: data.businessName,
     Business_Address: data.businessAddress,
-    Contact_Info: data.contactInfo,
-    Advert_Title: data.advertTitle,
-    Advert_Description: data.advertDescription,
-    Link_URL: data.linkUrl,
-    Billing_Status: "Inactive",
-    Monthly_Amount: 1200,
+    Email: data.email ?? data.contactInfo,
+    Contact_Phone: data.contactInfo,
+    Website: data.linkUrl,
+    User_ID: data.userId ?? "",
+    Status: "Active",
   });
+
+  const record = await client.createRecord(TABLES.BusinessAdverts, {
+    Advert: data.advertTitle,
+    Business_Name: data.businessName,
+    Destination_URL: data.linkUrl,
+    Offer: data.advertDescription,
+    Billing_Status: "Inactive",
+    Monthly_Amount_MXN: 1200,
+    Approved: false,
+    Status: "Draft",
+    Sponsor_Account: [{ id: sponsorAccount.id }],
+  });
+
   await invalidate({ tags: [TAGS.PROPERTIES] });
   return record.id;
 }
 
-export async function updateSponsorAdvert(id: string, updates: Partial<SponsorAdvert>): Promise<void> {
+export async function updateSponsorAdvert(id: string, updates: Record<string, unknown>): Promise<void> {
   const client = new TeableClient(getTeableConfig());
-  await client.updateRecord("Sponsor_Adverts", id, updates);
+  await client.updateRecord(TABLES.BusinessAdverts, id, updates);
   await invalidate({ tags: [TAGS.PROPERTIES] });
 }
 
 export async function getSponsorAdvertById(id: string): Promise<SponsorAdvert | null> {
   const client = new TeableClient(getTeableConfig());
   const rows = await client.runSql<SqlRow>(
-    `SELECT * FROM ${qiTable("Sponsor_Adverts")} WHERE ${qi("__id")} = ${lit(id)} LIMIT 1`,
+    `SELECT ${qi("__id")}, ${qi("Advert")}, ${qi("Business_Name")}, ${qi("Offer")}, ${qi("Creative")}, ${qi("Destination_URL")}, ${qi("Billing_Status")}, ${qi("Monthly_Amount_MXN")}, ${qi("Approved")}, ${qi("Status")}, ${qi("Stripe_Checkout_Session_ID")}, ${qi("Stripe_Subscription_ID")}, ${qi("Stripe_Customer_ID")}, ${qi("Current_Period_End")}, ${qi("Cancellation_At")} FROM ${qiTable(TABLES.BusinessAdverts)} WHERE ${qi("__id")} = ${lit(id)} LIMIT 1`,
   );
   if (rows.length === 0) return null;
   return parseAdvertRow(rows[0], id);
@@ -88,7 +102,7 @@ export async function getSponsorAdvertById(id: string): Promise<SponsorAdvert | 
 export async function getActiveSponsorAdverts(): Promise<SponsorAdvert[]> {
   const client = new TeableClient(getTeableConfig());
   const rows = await client.runSql<SqlRow>(
-    `SELECT * FROM ${qiTable("Sponsor_Adverts")} WHERE ${qi("Billing_Status")} = ${lit("Active")} ORDER BY ${qi("Created")} DESC`,
+    `SELECT ${qi("__id")}, ${qi("Advert")}, ${qi("Business_Name")}, ${qi("Offer")}, ${qi("Creative")}, ${qi("Destination_URL")}, ${qi("Billing_Status")}, ${qi("Monthly_Amount_MXN")}, ${qi("Approved")}, ${qi("Status")} FROM ${qiTable(TABLES.BusinessAdverts)} WHERE ${qi("Billing_Status")} = ${lit("Active")} AND ${qi("Approved")} IS TRUE ORDER BY ${qi("Priority")} ASC, ${qi("Created")} DESC`,
   );
-  return rows.map((row, i) => parseAdvertRow(row, String(row.__id ?? `s-${i}`)));
+  return rows.map((row) => parseAdvertRow(row, String(row.__id ?? "")));
 }

@@ -18,7 +18,7 @@ export default function SponsorForm({ locale, email }: SponsorFormProps) {
   const [error, setError] = useState<string | null>(null);
 
   const [form, setForm] = useState({
-    sponsorName: "",
+    contactName: "",
     businessName: "",
     businessAddress: "",
     contactInfo: email,
@@ -55,7 +55,7 @@ export default function SponsorForm({ locale, email }: SponsorFormProps) {
     setUploading(true);
     const data = new FormData();
     data.append("recordId", advertId);
-    data.append("fieldId", "fldSponsorImage");
+    data.append("fieldId", "fldPMEtE6evTyV01UfW");
     data.append("file", file);
     try {
       await fetch("/api/uploads/attachment", { method: "POST", body: data });
@@ -153,8 +153,8 @@ export default function SponsorForm({ locale, email }: SponsorFormProps) {
           <input
             type="text"
             required
-            value={form.sponsorName}
-            onChange={(e) => update("sponsorName", e.target.value)}
+            value={form.contactName}
+            onChange={(e) => update("contactName", e.target.value)}
             className="w-full border rounded-md px-3 py-2 text-sm"
           />
         </div>

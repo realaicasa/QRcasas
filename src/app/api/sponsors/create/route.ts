@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
   }
 
   let body: {
-    sponsorName: string;
+    contactName: string;
     businessName: string;
     businessAddress: string;
     contactInfo: string;
@@ -26,12 +26,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  if (!body.sponsorName || !body.businessName || !body.advertTitle || !body.linkUrl) {
+  if (!body.contactName || !body.businessName || !body.advertTitle || !body.linkUrl) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
 
   try {
-    const id = await createSponsorAdvert(body);
+    const id = await createSponsorAdvert({
+      ...body,
+      userId: session.userId,
+      email: session.email,
+    });
     return NextResponse.json({ id });
   } catch (err) {
     console.error("Sponsor creation failed:", err);

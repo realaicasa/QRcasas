@@ -6,6 +6,7 @@ import {
   setPropertiesPhotoPackagePaid,
 } from "@/lib/data/renewals";
 import { updateAgentProfile } from "@/lib/data/agents";
+import { getSponsorAdvertById, updateSponsorAdvert } from "@/lib/data/sponsors";
 
 interface StripeEvent {
   type: string;
@@ -155,6 +156,49 @@ export async function POST(req: NextRequest) {
       }
     } catch (err) {
       console.error("Subscription update error:", err);
+    }
+  }
+
+  if (event.type === "checkout.session.completed" && event.data.object.metadata?.advertId) {
+    try {
+      const metadata = event.data.object.metadata;
+      const advertId = metadata.advertId;
+      const advert = await getSponsorAdvertById(advertId);
+      if (advert) {
+        await updateSponsorAdvert(advertId, {
+          Stripe_Checkout_Session_ID: event.data.object.id,
+          Stripe_Customer_ID: event.data.object.customer ?? "",
+        });
+      }
+    } catch (err) {
+      console.error("Sponsor checkout error:", err);
+    }
+  }
+
+  if ((event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") && event.data.object.metadata?.advertId) {
+    try {
+      const metadata = event.data.object.metadata;
+      const advertId = metadata.advertId;
+      const status = event.data.object.status;
+      const advert = await getSponsorAdvertById(advertId);
+      if (!advert) {
+        if (status === "active" || status === "trialing") {
+          await updateSponsorAdvert(advertId, {
+            Billing_Status: "Active",
+            Approved: true,
+            Status: "Active",
+            Stripe_Subscription_ID: event.data.object.id,
+          });
+        } else {
+          await updateSponsorAdvert(advertId, {
+            Billing_Status: status === "canceled" ? "Cancelled" : "Past Due",
+            Approved: false,
+            Status: "Paused",
+          });
+        }
+      }
+    } catch (err) {
+      console.error("Sponsor subscription error:", err);
     }
   }
 
