@@ -230,6 +230,16 @@ export default function AgentDetailModal({ agent, locale, isLoggedIn }: AgentDet
                   )}
                 </div>
 
+                {/* Portfolio link */}
+                <div className="mb-4">
+                  <Link
+                    href={`/${locale}/directory/${agent.id}#portfolio`}
+                    className="inline-flex items-center gap-2 rounded-lg bg-primary/10 px-4 py-2 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+                  >
+                    {t("View Portfolio", "Ver Portafolio")}
+                  </Link>
+                </div>
+
                 {/* Back link */}
                 <Link
                   href={`/${locale}/directory`}

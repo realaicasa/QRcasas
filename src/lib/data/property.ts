@@ -394,6 +394,67 @@ export async function getPropertiesByAgent(agentId: string): Promise<AgentProper
   }));
 }
 
+export async function getPublicPropertiesByAgent(agentId: string, limit = 20): Promise<PropertyListItem[]> {
+  const client = new TeableClient(getTeableConfig());
+  const sql =
+    "SELECT " +
+    [
+      qi("__id"), qi("Public_Slug"), qi("Title"), qi("Price"), qi("Currency"),
+      qi("Listing_Type"), qi("Bedrooms"), qi("Bathrooms"),
+      qi("Interior_Area"), qi("Area_Unit"), qi("Photos"),
+      qi("Public_Location"), qi("Latitude"), qi("Longitude"),
+      qi("Featured"), qi("Pet_Friendly"), qi("Parking"), qi("Near_Shopping"),
+      qi("Near_Jungle"), qi("Near_Beach"), qi("TwentyFour_Hour_Security"), qi("Updated"),
+    ].join(", ") +
+    " FROM " + qiTable(DB_TABLES.Properties) +
+    " WHERE " + qi("Client") + " = " + lit(agentId) +
+    " AND " + qi("Published") + " IS TRUE" +
+    " ORDER BY " + qi("Featured") + " DESC, " + qi("Created") + " DESC" +
+    " LIMIT " + lit(limit);
+
+  const rows = await client.runSql<SqlRow>(sql);
+  return rows.map((row) => {
+    const photos = Array.isArray(row.Photos)
+      ? (row.Photos as unknown[])
+          .filter((a): a is Record<string, unknown> => typeof a === "object" && a != null)
+          .map((a) => ({
+            url: typeof a.url === "string" ? a.url : undefined,
+            signedUrl: typeof a.signedUrl === "string" ? a.signedUrl : undefined,
+          }))
+      : [];
+    let photoAltText: string[] = [];
+    try {
+      const parsed = JSON.parse(String(row.Photo_Alt_Text ?? "[]"));
+      if (Array.isArray(parsed)) photoAltText = parsed.map(String);
+    } catch { photoAltText = []; }
+    return {
+      id: String(row.__id ?? ""),
+      slug: row.Public_Slug != null ? String(row.Public_Slug) : "",
+      title: row.Title != null ? String(row.Title) : "",
+      price: row.Price != null ? Number(row.Price) : null,
+      currency: row.Currency != null ? String(row.Currency) : null,
+      listingType: row.Listing_Type != null ? String(row.Listing_Type) : null,
+      bedrooms: row.Bedrooms != null ? Number(row.Bedrooms) : null,
+      bathrooms: row.Bathrooms != null ? Number(row.Bathrooms) : null,
+      interiorArea: row.Interior_Area != null ? Number(row.Interior_Area) : null,
+      areaUnit: row.Area_Unit != null ? String(row.Area_Unit) : null,
+      photos,
+      photoAltText,
+      publicLocation: row.Public_Location != null ? String(row.Public_Location) : null,
+      petFriendly: row.Pet_Friendly === true,
+      parking: row.Parking === true,
+      nearShopping: row.Near_Shopping === true,
+      nearJungle: row.Near_Jungle === true,
+      nearBeach: row.Near_Beach === true,
+      twentyFourHourSecurity: row.TwentyFour_Hour_Security === true,
+      latitude: row.Latitude != null ? Number(row.Latitude) : null,
+      longitude: row.Longitude != null ? Number(row.Longitude) : null,
+      featured: row.Featured === true,
+      updatedAt: row.Updated != null ? String(row.Updated) : "",
+    };
+  });
+}
+
 /** Create a new property record in Teable. Returns the new record id. */
 export async function createProperty(
   agentId: string,
