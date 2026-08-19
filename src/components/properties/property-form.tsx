@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Upload } from "lucide-react";
 import type { PropertyRecord } from "@/lib/data/property";
 import SeoFields from "@/components/dashboard/seo-fields";
 import type { LocationOption } from "@/lib/data/locations";
@@ -298,14 +299,18 @@ export default function PropertyForm({ locale, property, tierLevel, onSubmit, lo
           <input type="checkbox" checked={form.photoUpgradeRequested} onChange={(e) => update("photoUpgradeRequested", e.target.checked)} className="size-4 rounded border-border text-primary" />
           {t("Add photo upgrade (+200 MXN)", "Agregar mejora de fotos (+200 MXN)")}
         </label>
-        <input type="file" accept="image/*" multiple={form.photoUpgradeRequested} onChange={(e) => addPhotos(e.target.files)} className="block w-full text-sm" />
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+          <Upload className="size-4" />
+          {t("Choose Photos", "Elegir Fotos")}
+          <input type="file" accept="image/*" multiple={form.photoUpgradeRequested} onChange={(e) => addPhotos(e.target.files)} className="hidden" />
+        </label>
         {photos.length > 0 && (
           <div className="grid gap-3 sm:grid-cols-2">
             {photos.map((photo, index) => (
               <div key={photo.previewUrl} className="rounded-lg border p-2">
                 <img src={photo.previewUrl} alt={photo.altText || t("Preview", "Vista previa")} className="mb-2 aspect-video w-full rounded object-cover" />
                 <p className="mb-1 text-xs font-medium text-primary">{index === 0 ? t("Featured image", "Imagen destacada") : `${t("Photo", "Foto")} ${index + 1}`}</p>
-                <input type="text" required placeholder={t("Alt text", "Texto alternativo")} value={photo.altText} onChange={(e) => updatePhotoAlt(index, e.target.value)} className="w-full rounded border px-2 py-1.5 text-sm" />
+                <input type="text" placeholder={t("Alt text (optional)", "Texto alternativo (opcional)")} value={photo.altText} onChange={(e) => updatePhotoAlt(index, e.target.value)} className="w-full rounded border px-2 py-1.5 text-sm" />
               </div>
             ))}
           </div>

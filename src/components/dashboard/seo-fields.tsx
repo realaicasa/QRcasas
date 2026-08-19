@@ -65,7 +65,7 @@ export default function SeoFields({
           type="text"
           value={seoTitle}
           onChange={(e) => setSeoTitle(e.target.value)}
-          placeholder="e.g. 3-Bed Luxury Condo in Aldea Zama | Tulum Listing"
+          placeholder="e.g. Dynamic Mike — Playa del Carmen Real Estate Agent"
           maxLength={60}
           className="w-full border rounded-md px-3 py-2 text-sm"
         />
@@ -81,7 +81,7 @@ export default function SeoFields({
         <textarea
           value={seoDescription}
           onChange={(e) => setSeoDescription(e.target.value)}
-          placeholder="e.g. Discover this turnkey 3-bedroom penthouse with private rooftop pool..."
+          placeholder="e.g. Specialist in Playa del Carmen vacation rentals and long-term rentals. Contact Dynamic Mike for verified Quintana Roo properties."
           maxLength={160}
           rows={3}
           className="w-full border rounded-md px-3 py-2 text-sm"
@@ -99,24 +99,13 @@ export default function SeoFields({
           type="text"
           value={seoKeywords}
           onChange={(e) => setSeoKeywords(e.target.value)}
-          placeholder="e.g. tulum condo, aldea zama real estate, luxury listing"
+          placeholder="e.g. playa del carmen real estate, quintana roo agent, property rentals"
           className="w-full border rounded-md px-3 py-2 text-sm"
         />
         <p className="text-xs text-muted-foreground mt-1">
           Comma-separated keywords for internal reference
         </p>
       </div>
-
-      {onSave && (
-        <button
-          type="button"
-          onClick={handleSave}
-          disabled={saving}
-          className="inline-flex items-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save SEO Settings"}
-        </button>
-      )}
     </div>
   );
 }

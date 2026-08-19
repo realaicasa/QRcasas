@@ -11,7 +11,7 @@ interface AgentFormProps {
   locale: string;
   agent?: AgentProfile | null;
   tierLevel: string;
-  onSubmit: (data: AgentFormData) => void | Promise<void>;
+  onSubmit: (data: AgentFormData) => void | Promise<{ needsCheckout?: boolean; requestVerified?: boolean; requestFeatured?: boolean } | void>;
 }
 
 export interface AgentFormData {
@@ -52,6 +52,7 @@ export default function AgentForm({ locale, agent, tierLevel, onSubmit }: AgentF
   const t = (en: string, es: string) => (locale === "es" ? es : en);
   const [saving, setSaving] = useState(false);
   const [uploadMessage, setUploadMessage] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const [form, setForm] = useState<AgentFormData>({
     businessName: agent?.businessName ?? "",
@@ -81,7 +82,24 @@ export default function AgentForm({ locale, agent, tierLevel, onSubmit }: AgentF
     e.preventDefault();
     setSaving(true);
     try {
-      await onSubmit(form);
+      const result = await onSubmit(form) as { needsCheckout?: boolean; requestVerified?: boolean; requestFeatured?: boolean } | void;
+      if (result?.needsCheckout) {
+        const res = await fetch("/api/stripe/subscription", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            requestVerified: result.requestVerified,
+            requestFeatured: result.requestFeatured,
+          }),
+        });
+        if (res.ok) {
+          const { url } = await res.json();
+          if (url) {
+            window.location.href = url;
+            return;
+          }
+        }
+      }
     } finally {
       setSaving(false);
     }
@@ -96,9 +114,16 @@ export default function AgentForm({ locale, agent, tierLevel, onSubmit }: AgentF
     data.append("recordId", agent.id);
     data.append("fieldId", fieldId);
     data.append("file", file);
+    setUploadError(null);
     setUploadMessage(t("Uploading image...", "Subiendo imagen..."));
     const response = await fetch("/api/uploads/attachment", { method: "POST", body: data });
-    setUploadMessage(response.ok ? t("Image uploaded", "Imagen subida") : t("Upload failed", "Error al subir"));
+    if (response.ok) {
+      setUploadMessage(t("Image uploaded successfully. Refresh to see it.", "Imagen subida. Refresca para verla."));
+    } else {
+      const err = await response.json().catch(() => ({}));
+      setUploadError(err.error ?? t("Upload failed", "Error al subir"));
+      setUploadMessage(null);
+    }
   };
 
   const uploadProofOfId = async (file: File | undefined) => {
@@ -250,17 +275,43 @@ export default function AgentForm({ locale, agent, tierLevel, onSubmit }: AgentF
       {agent && (
         <div className="border rounded-lg p-4 space-y-4">
           <h3 className="font-medium text-sm">{t("Profile images", "Imágenes del perfil")}</h3>
+
+          {/* Show current profile photo */}
+          {agent.profilePhoto?.url && (
+            <div className="flex items-center gap-3">
+              <img src={agent.profilePhoto.url} alt={t("Current profile photo", "Foto actual")} className="size-16 rounded-lg border border-border object-cover" />
+              <span className="text-xs text-green-600">{t("Current profile photo", "Foto de perfil actual")}</span>
+            </div>
+          )}
+
+          {/* Show current business logo */}
+          {agent.logoImage?.url && (
+            <div className="flex items-center gap-3">
+              <img src={agent.logoImage.url} alt={t("Current logo", "Logo actual")} className="size-16 rounded-lg border border-border object-cover" />
+              <span className="text-xs text-green-600">{t("Current business logo", "Logo actual del negocio")}</span>
+            </div>
+          )}
+
           <div className="grid gap-4 sm:grid-cols-2">
-            <label className="text-sm">
+            <div>
               <span className="mb-1 block text-xs font-medium text-muted-foreground">{t("Personal profile photo", "Foto personal de perfil")}</span>
-              <input type="file" accept="image/*" onChange={(e) => uploadAgentImage(e.target.files?.[0], "fldx4W6ZEhSV29zqJYV")} className="block w-full text-sm" />
-            </label>
-            <label className="text-sm">
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+                <Upload className="size-4" />
+                {t("Choose Photo", "Elegir Foto")}
+                <input type="file" accept="image/*" onChange={(e) => uploadAgentImage(e.target.files?.[0], "fldx4W6ZEhSV29zqJYV")} className="hidden" />
+              </label>
+            </div>
+            <div>
               <span className="mb-1 block text-xs font-medium text-muted-foreground">{t("Business logo", "Logo del negocio")}</span>
-              <input type="file" accept="image/*" onChange={(e) => uploadAgentImage(e.target.files?.[0], "fld6ugy4EQy1HQyseVg")} className="block w-full text-sm" />
-            </label>
+              <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border bg-card px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted">
+                <Upload className="size-4" />
+                {t("Choose Logo", "Elegir Logo")}
+                <input type="file" accept="image/*" onChange={(e) => uploadAgentImage(e.target.files?.[0], "fld6ugy4EQy1HQyseVg")} className="hidden" />
+              </label>
+            </div>
           </div>
-          {uploadMessage && <p className="text-xs text-muted-foreground">{uploadMessage}</p>}
+          {uploadMessage && <p className="text-xs text-green-600">{uploadMessage}</p>}
+          {uploadError && <p className="text-xs text-red-600">{uploadError}</p>}
         </div>
       )}
 
