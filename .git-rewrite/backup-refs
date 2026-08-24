@@ -1,6 +1,0 @@
-680b15c30d34378dbf116dd738f26db96d42e789 commit	refs/heads/clean-history
-ebb8567bb7af8ab8227545eb7470c53aaad22dd6 commit	refs/heads/main
-a488f4d9310d4277ebe5b34bf36cde3e44191686 commit	refs/heads/master
-4cc609906e02f578ed1cbcd9e1b61f897b653302 commit	refs/remotes/origin/HEAD
-680b15c30d34378dbf116dd738f26db96d42e789 commit	refs/remotes/origin/clean-history
-4cc609906e02f578ed1cbcd9e1b61f897b653302 commit	refs/remotes/origin/main
