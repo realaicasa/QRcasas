@@ -42,11 +42,11 @@
 - Sponsor: `customer.subscription.updated` (active) → `Billing_Status=Active, Approved=true`; cancelled → paused.
 
 ## 7. Stripe Configuration (LIVE — all env vars set in Vercel)
-- `STRIPE_SECRET_KEY` = `rk_live_51MvrBt…` (**must be rotated**)
+- `STRIPE_SECRET_KEY` = `[REDACTED - SET IN VERCEL]` (**must be rotated**)
 - `STRIPE_PRICE_SINGLE_PROPERTY` = `price_1U5Wy6Ge9hhLYer6Yrs9Joal` (500 MXN one-time)
 - `STRIPE_PRICE_UP_TO_10` = `price_1U5XNJGe9hhLYer6uIsCWO08` (3,000 MXN one-time)
 - `STRIPE_PRICE_UP_TO_25` = `price_1U5XPLGe9hhLYer6dMypHsFt` (6,900 MXN one-time)
-- `STRIPE_WEBHOOK_SECRET` = `whsec_3E9jO58qNbAsdC9K0Bg4cZSeBszezZ3D`
+- `STRIPE_WEBHOOK_SECRET` = `[REDACTED - SET IN VERCEL]`
 - Webhook endpoint: `https://qrcasas.com/api/stripe/webhook` (ID: `we_1U5ZAkGe9hhLYer61iUulLAw`)
 - Events configured: `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `customer.subscription.created`, `customer.subscription.deleted`, `customer.subscription.paused`, `customer.subscription.resumed`, `customer.subscription.updated`
 - Photo add-on: 200 MXN per property, inline `price_data`

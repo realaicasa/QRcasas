@@ -24,7 +24,7 @@ Quick reference for common development tasks.
 "Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Do not recreate lifecycle fields or replace Teable OTP/Google OAuth. Add only the supplied Stripe credentials and canonical Price IDs, verify the existing webhook configuration, configure Resend only where the canonical automation requires it, run production checks, and report the deployment commit."
 
 ## Security Rotation
-"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Rotate the exposed GitHub and Teable PATs, update Vercel Production variables without printing secrets, verify the deployed commit, and confirm the working tree is clean."
+"Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Rotate the exposed GitHub PAT, Teable PAT, and live Stripe restricted keys. Update Vercel Production variables without printing secrets. Verify the deployed commit and confirm the working tree is clean."
 
 ## Initialize (Copy-paste to start any session)
 > Read SYSTEM_PROTOCOL.md and PROJECT_MANIFEST.md. Check git status, current branch, recent commits, and the Vercel deployment commit before changing code.
