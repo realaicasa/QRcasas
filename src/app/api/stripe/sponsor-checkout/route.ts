@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getCustomerAuth } from "@/lib/customer-auth";
 import { getSponsorAdvertById, updateSponsorAdvert } from "@/lib/data/sponsors";
-import { createCheckoutSession, isStripeConfigured } from "@/lib/stripe";
+import { createCheckoutSession, isStripeConfigured, RECURRING_PRICE_IDS } from "@/lib/stripe";
 import { absoluteUrl } from "@/lib/request";
 
 export async function POST(req: NextRequest) {
@@ -29,17 +29,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Advert not found" }, { status: 404 });
   }
 
-  const lineItems = [
-    {
-      quantity: 1,
-      price_data: {
-        currency: "mxn",
-        unit_amount: 120000,
-        recurring: { interval: "month" as const },
-        product_data: { name: "Sponsor Advertisement — monthly" },
-      },
-    },
-  ];
+  const priceId = RECURRING_PRICE_IDS.sponsor_monthly;
+  const lineItems = priceId
+    ? [{ price: priceId, quantity: 1 }]
+    : [
+        {
+          quantity: 1,
+          price_data: {
+            currency: "mxn",
+            unit_amount: 120000,
+            recurring: { interval: "month" as const },
+            product_data: { name: "Sponsor Advertisement — monthly" },
+          },
+        },
+      ];
 
   const successUrl = absoluteUrl(`/sponsors/dashboard?subscribed=1&session_id={CHECKOUT_SESSION_ID}`);
   const cancelUrl = absoluteUrl("/sponsors/dashboard?canceled=1");

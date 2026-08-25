@@ -25,6 +25,12 @@ export const PACKAGE_PRICES = {
 
 export const PHOTO_UPGRADE_PRICE = 200;
 
+export const RECURRING_PRICE_IDS = {
+  verified_agent_monthly: process.env.STRIPE_PRICE_VERIFIED_MONTHLY,
+  featured_agent_monthly: process.env.STRIPE_PRICE_FEATURED_MONTHLY,
+  sponsor_monthly: process.env.STRIPE_PRICE_SPONSOR_MONTHLY,
+} as const;
+
 export function getPriceIdForTier(tier: "single" | "pack_10" | "pack_25"): string | null {
   const map: Record<string, string | undefined> = {
     single: process.env.STRIPE_PRICE_SINGLE_PROPERTY,

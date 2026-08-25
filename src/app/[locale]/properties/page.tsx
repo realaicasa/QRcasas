@@ -2,9 +2,11 @@ import { Metadata } from "next";
 import Link from "next/link";
 import { ShieldCheck, Users, Tag } from "lucide-react";
 import { getPublicProperties, type PropertyListFilters, type PropertySortOption } from "@/lib/data/property";
+import { getActiveSponsorAdverts } from "@/lib/data/sponsors";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
 import { getLocationsByType } from "@/lib/data/locations";
 import PropertiesExplorer from "@/components/properties/properties-explorer";
+import SponsorCarousel from "@/components/sponsors/sponsor-carousel";
 import SponsorModal from "@/components/sponsors/sponsor-modal";
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }): Promise<Metadata> {
@@ -81,6 +83,7 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
   ]);
 
   const featuredProperties = await getPublicProperties({ featured: true }, "newest", 20, 0);
+  const sponsorAdverts = await getActiveSponsorAdverts().catch(() => []);
 
   return (
     <main>
@@ -113,6 +116,11 @@ export default async function PropertiesPage({ params, searchParams }: PageProps
         view={view}
         featuredProperties={featuredProperties.properties}
       />
+
+      {/* Sponsor carousel */}
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6">
+        <SponsorCarousel adverts={sponsorAdverts} locale={locale} />
+      </div>
 
       {/* Bottom sections */}
       <div className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 space-y-6">

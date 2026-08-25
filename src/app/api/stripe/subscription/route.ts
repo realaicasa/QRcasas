@@ -2,10 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { getCustomerAuth } from "@/lib/customer-auth";
 import { getAgentByUserId, updateAgentProfile } from "@/lib/data/agents";
-import { createCheckoutSession, isStripeConfigured } from "@/lib/stripe";
+import { createCheckoutSession, isStripeConfigured, RECURRING_PRICE_IDS } from "@/lib/stripe";
 import { absoluteUrl } from "@/lib/request";
-
-const UPSERT_PRICES: Record<string, { priceId: string; label: string }> = {};
 
 export async function POST(req: NextRequest) {
   if (!isStripeConfigured()) {
@@ -51,27 +49,37 @@ export async function POST(req: NextRequest) {
   }> = [];
 
   if (requestVerified) {
-    lineItems.push({
-      quantity: 1,
-      price_data: {
-        currency: "mxn",
-        unit_amount: 30000,
-        recurring: { interval: "month" },
-        product_data: { name: "Verified Agent — monthly" },
-      },
-    });
+    const priceId = RECURRING_PRICE_IDS.verified_agent_monthly;
+    if (priceId) {
+      lineItems.push({ price: priceId, quantity: 1 });
+    } else {
+      lineItems.push({
+        quantity: 1,
+        price_data: {
+          currency: "mxn",
+          unit_amount: 30000,
+          recurring: { interval: "month" },
+          product_data: { name: "Verified Agent — monthly" },
+        },
+      });
+    }
   }
 
   if (requestFeatured) {
-    lineItems.push({
-      quantity: 1,
-      price_data: {
-        currency: "mxn",
-        unit_amount: 30000,
-        recurring: { interval: "month" },
-        product_data: { name: "Featured Agent — monthly" },
-      },
-    });
+    const priceId = RECURRING_PRICE_IDS.featured_agent_monthly;
+    if (priceId) {
+      lineItems.push({ price: priceId, quantity: 1 });
+    } else {
+      lineItems.push({
+        quantity: 1,
+        price_data: {
+          currency: "mxn",
+          unit_amount: 30000,
+          recurring: { interval: "month" },
+          product_data: { name: "Featured Agent — monthly" },
+        },
+      });
+    }
   }
 
   const successUrl = absoluteUrl("/account/properties?subscribed=1&session_id={CHECKOUT_SESSION_ID}");

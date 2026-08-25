@@ -8,6 +8,7 @@ import { getPropertiesByAgent, type AgentPropertyListItem } from "@/lib/data/pro
 import { getRenewalByStripeSessionId } from "@/lib/data/renewals";
 import { countAgentContactOpens } from "@/lib/data/activity";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
+import BillingPortalButton from "@/components/shared/billing-portal-button";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -169,6 +170,7 @@ export default async function AccountPropertiesPage({
           <Link href={`/${locale}/account/properties/new`} className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground hover:bg-primary/90">
             {t("Add Property", "Agregar Propiedad")}
           </Link>
+          <BillingPortalButton locale={locale} labelEn="Manage Billing" labelEs="Gestionar Pagos" />
         </div>
       </div>
 

@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { getCustomerAuth } from "@/lib/customer-auth";
 import { getCopy, normalizeLocale, type Locale } from "@/lib/i18n";
+import BillingPortalButton from "@/components/shared/billing-portal-button";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -61,12 +62,15 @@ export default async function SponsorDashboardPage({
             "Administra tus anuncios de patrocinador y suscripciones aquí."
           )}
         </p>
-        <a
-          href={`/${locale}/sponsors/register`}
-          className="inline-flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-purple-700"
-        >
-          {t("Create New Advert", "Crear Nuevo Anuncio")}
-        </a>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={`/${locale}/sponsors/register`}
+            className="inline-flex items-center justify-center gap-2 rounded-lg bg-purple-600 px-6 py-3 text-sm font-bold text-white shadow-sm transition-colors hover:bg-purple-700"
+          >
+            {t("Create New Advert", "Crear Nuevo Anuncio")}
+          </a>
+          <BillingPortalButton locale={locale} labelEn="Manage Billing" labelEs="Gestionar Pagos" />
+        </div>
       </div>
     </main>
   );
