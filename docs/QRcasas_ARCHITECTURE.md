@@ -115,13 +115,13 @@ app/
 │   ├── layout.tsx                # Locale layout + header/footer
 │   ├── page.tsx                  # Redirect to /en/properties
 │   ├── properties/
-│   │   ├── page.tsx              # Search + results (server)
-│   │   ├── [slug]/page.tsx       # Property detail with QR, gallery
+│   │   ├── page.tsx              # Search + results (server) + sponsor carousel
+│   │   ├── [slug]/page.tsx       # Property detail with QR, gallery, Living Experience, compare dock, closing-cost button
 │   │   ├── components/
 │   │   │   ├── PropertiesExplorer.tsx    # Client: search modes
-│   │   │   ├── PropertyCard.tsx          # Card with match %
+│   │   │   ├── PropertyCard.tsx          # Card with match % + accolades
 │   │   │   ├── FilterBar.tsx             # Lifestyle filters
-│   │   │   ├── PropertyForm.tsx          # Create/edit form
+│   │   │   ├── PropertyForm.tsx          # Create/edit form + Lifestyle DNA tab
 │   │   │   ├── PropertyCreateFlow.tsx    # Wizard: price → form → upload → Stripe
 │   │   │   ├── PropertyEditFlow.tsx      # Edit + photo upload
 │   │   │   ├── PropertiesExplorer.tsx    # Client wrapper
@@ -326,22 +326,28 @@ Events handled:
 
 ### Environment Variables
 ```bash
-# Vercel Production
+# Vercel Production (all via env, never committed)
 TEABLE_API_URL=https://app.teable.ai/api
 TEABLE_API_TOKEN=***
 STRIPE_SECRET_KEY=***
-STRIPE_WEBHOOK_SECRET=***
-STRIPE_PRICE_SINGLE_PROPERTY=price_...
-STRIPE_PRICE_UP_TO_10=price_...
-STRIPE_PRICE_UP_TO_25=price_...
-STRIPE_PRICE_SPONSOR_MONTHLY=price_...
+STRIPE_WEBHOOK_SECRET=***  # we_1U5ZAkGe9hhLYer61iUulLAw
+STRIPE_PRICE_SINGLE_PROPERTY=price_...  # 500 MXN one-time
+STRIPE_PRICE_UP_TO_10=price_...         # 3000 MXN
+STRIPE_PRICE_UP_TO_25=price_...         # 6900 MXN
+STRIPE_PRICE_SPONSOR_MONTHLY=price_...  # 1200 MXN (or inline fallback)
 SITE_URL=https://qrcasas.com
 NEXTAUTH_SECRET=...
 NEXTAUTH_URL=https://qrcasas.com
-
-# Vercel Preview (auto-generated)
-# Same vars, different Stripe keys (test mode)
 ```
+
+### Modal System (UX Standard)
+All modals use `fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs p-3 sm:p-6 flex min-h-full items-center justify-center` with backdrop `onClick` close + `stopPropagation` on card + sticky header + Escape key. Applies to: PlatformGuideModal (open-book), Disclaimer, Legal, Install App, User Manual, BecomeSponsorModal, ClosingCostCalculator, Property Detail/Compare, BilingualSeoOpportunityModal. Ensures top visible on mobile and click-outside dismiss.
+
+### Sponsor Portal Enhancement (Latest)
+`BecomeSponsorModal.tsx` now supports featured banner + logo upload (FileReader or URL presets), headline + description (offer), external URL + WhatsApp CTA, live preview card before 1,200 MXN/mo Stripe subscription. Carousel `SponsorsAndFeaturedSection.tsx` renders banner, logo, verified badge, headline badge, description, action buttons. WebP 1600×800.
+
+### Super Admin Analytics
+`SuperAdminDashboardView.tsx`: Executive KPIs (active properties, realtors, QR scans, buyer views, intent leads, sponsor MRR), Realtor table (listings, scans, leads, AMPI status), Properties table (acoustic, beach walk, scans, views, price USD/MXN), Sponsor pipeline, Stripe catalog + webhook status, Teable sync station, header Super Admin button.
 
 ## Scaling Considerations
 
