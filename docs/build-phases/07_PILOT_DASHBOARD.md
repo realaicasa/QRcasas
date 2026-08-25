@@ -337,6 +337,15 @@ function FeedbackPrompt({ realtorId }) {
 }
 ```
 
+## Security Gate (Latest — hidden super-admin)
+Public header no longer exposes Super Admin tab. Access via discreet footer "Admin Portal" button + global shortcut `Ctrl+Shift+A` / `Cmd+Shift+A`. `SuperAdminLoginModal.tsx`: passkey `qrcasas-admin-2026` + show/hide toggle + optional 2FA PIN `772202`, 5-attempt 30s lock, `sessionStorage` 30-min expiry, Lock Terminal / Sign Out.
+
+## Footer Modals — Bilingual Standard
+All footer modals (UserManual, LegalCompliance, PlatformGuide, Disclaimer, InstallApp, BecomeSponsor) are now audited to render 100% pure EN or ES with no mixed blocks. Each has sticky header, outside-click + Escape close, `fixed inset-0 z-50 overflow-y-auto bg-black/75`.
+
+## AI Advisor Lead Capture
+Concise 1-3 sentences, multilingual (EN/ES/PL/RU/FR/DE/IT/PT), strict domain (verified inventory + Fideicomiso + Living DNA only), never leaks raw contact, inline lead card (Name/WhatsApp/Email/Horizon/question) → instant Kanban + red alarm bell + analytics.
+
 ## Pilot Success Criteria (Gate to Public Launch)
 
 | Metric | Threshold | Measurement |

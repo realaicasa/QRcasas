@@ -62,5 +62,14 @@ Listings: Single 500 MXN, 10-pack 3,000 MXN, 25-pack 6,900 MXN (13 wks) + 200 MX
 ## 10. Pilot Status
 20 Realtors invited free to populate DB, test lifestyle model, measure match→enquiry rate. Success = ≥80% lifestyle completion, ≥70% AI acceptance, contact intent lift.
 
-## 11. Outstanding (Next)
+## 11. Super Admin Security (Latest)
+Hidden from public nav, discreet footer "Admin Portal" button + `Ctrl+Shift+A` / `Cmd+Shift+A` shortcut. `SuperAdminLoginModal.tsx` gate: passkey `qrcasas-admin-2026`, show/hide toggle, optional 2FA PIN `772202`, 5-attempt 30s lock, `sessionStorage` 30-min expiry, Lock Terminal button.
+
+## 12. Footer Modals — 100% Bilingual
+All footer modals fully localized EN/ES via internal `t` (no mixed blocks): User Manual (5 tabs: Buyers/Agents/Landlords/Sponsors/QR Passport), Legal Compliance (Terms, ARCO, NOM-247 PROFECO, Realtor Code), Platform Guide (Living DNA, Fideicomiso 50-yr), Disclaimer, Install App (iOS Safari / Android Chrome / Desktop PWA).
+
+## 13. AI Living Advisor Chatbot (Latest)
+Concise 1-3 sentence responses, never dumps catalogs. Auto-detects user language (EN/ES/PL/RU/FR/DE/IT/PT…) + header EN|ES toggle + reset button. Strictly restricted to verified inventory, agents, Mexican coastal facts (Fideicomiso, closing costs, Living DNA). Off-topic politely declined + redirected. NEVER leaks raw phone/WhatsApp/email — instead shows inline lead dispatch card (Name, WhatsApp, Email, Move-in horizon, question) → instant Kanban CRM + notification bell + analytics. Uses Gemini 2.5 Flash when configured, deterministic fallback otherwise.
+
+## 14. Outstanding (Next)
 Stripe webhook missing `customer.subscription.updated/deleted` in dashboard (code ready), credential rotation (exposed PATs), Pro/Pro Plus Price IDs, live image tests, sponsor carousel verification, Customer Portal, verified ID → Advertiser Verifications routing, portfolio polish.

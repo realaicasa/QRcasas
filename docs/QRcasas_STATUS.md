@@ -18,8 +18,9 @@
 | **Agent detail** | Modal + page with #portfolio grid, sign-in gate contact, View Portfolio link, bilingual | ✅ (Return→Properties fixed) |
 | **Sponsor** | /sponsors/register (contact/business/ad/headline/desc/link) → image/logo (WebP 1600×800) + live preview → 1,200 MXN/mo Stripe → dashboard (status, edit, Stripe Customer Portal, delete) → webhook Active/Past Due/Cancelled → carousel (`Billing_Status=Active && Approved`) | ✅ |
 | **Payments** | Listings (500/3000/6900 + 200 photo) + agent upsells + sponsor, webhook sole authority (7 events), success banners | ✅ Code ready |
-| **Super Admin** | Executive KPIs, realtor/property/sponsor tables, pending verifications, reports moderation, Stripe catalog + webhook status `we_1U5ZAkGe9hhLYer61iUulLAw`, Teable sync | ✅ |
-| **PWA/Platform** | Bilingual EN/ES, PWA install modal, legal/disclaimer/user manual modals (outside-click + Escape, sticky header), report flow (login-gated, prefilled refs, ticket REP-XXXX) | ✅ |
+| **Super Admin** | Hidden nav, footer Admin Portal + `Ctrl+Shift+A`, passkey `qrcasas-admin-2026` + 2FA `772202`, 30s lock, sessionStorage 30min, Executive KPIs, realtor/property/sponsor tables, pending verifications, reports moderation, Stripe catalog + webhook status `we_1U5ZAkGe9hhLYer61iUulLAw`, Teable sync | ✅ |
+| **PWA/Platform** | Bilingual EN/ES (footer modals 100% EN or ES, no mixed), PWA install modal, legal/disclaimer/user manual modals (outside-click + Escape, sticky header), report flow (login-gated, prefilled refs, ticket REP-XXXX) | ✅ |
+| **AI Advisor** | Concise 1-3 sentences, multilingual auto-detect + EN|ES toggle, strict domain (no hallucination), never leaks phone/email, inline lead card → Kanban + notification bell, Gemini 2.5 Flash + deterministic fallback | ✅ |
 | **Media** | `src/lib/media.ts` safe fallback, sharp WebP, signedUrl handling | ✅ |
 
 ## Known Fixed Issues
