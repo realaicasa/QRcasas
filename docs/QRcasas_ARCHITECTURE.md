@@ -340,14 +340,17 @@ NEXTAUTH_SECRET=...
 NEXTAUTH_URL=https://qrcasas.com
 ```
 
-### Modal System (UX Standard)
-All modals use `fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs p-3 sm:p-6 flex min-h-full items-center justify-center` with backdrop `onClick` close + `stopPropagation` on card + sticky header + Escape key. Applies to: PlatformGuideModal (open-book), Disclaimer, Legal, Install App, User Manual, BecomeSponsorModal, ClosingCostCalculator, Property Detail/Compare, BilingualSeoOpportunityModal. Ensures top visible on mobile and click-outside dismiss.
+### Modal System (UX Standard — Verified)
+All modals use `fixed inset-0 z-50 overflow-y-auto bg-black/75 backdrop-blur-xs p-3 sm:p-6 flex min-h-full items-center justify-center` with backdrop `onClick`/`onPointerDownOutside` close + `stopPropagation` on card + sticky header + Escape. Applies to: PlatformGuideModal (open-book — now top-visible + outside-click fixed), Disclaimer, Legal (localized pending-review when Draft), Install App, User Manual (now 100% EN or ES), BecomeSponsorModal, ClosingCostCalculator, Property Detail/Compare, BilingualSeoOpportunityModal.
 
-### Sponsor Portal Enhancement (Latest)
-`BecomeSponsorModal.tsx` now supports featured banner + logo upload (FileReader or URL presets), headline + description (offer), external URL + WhatsApp CTA, live preview card before 1,200 MXN/mo Stripe subscription. Carousel `SponsorsAndFeaturedSection.tsx` renders banner, logo, verified badge, headline badge, description, action buttons. WebP 1600×800.
+### Sponsor Portal Enhancement (Audited)
+`BecomeSponsorModal.tsx` supports featured banner (1600×800 Creative) + separate square logo upload, headline + description (Offer), external URL + WhatsApp CTA, live preview before 1,200 MXN/mo Stripe subscription. Public cards overlay logo on banner + headline badge + verified partner. Sponsor tables: Sponsor Accounts `tbliuwzQOgnEFQNqxj9` + Business Adverts `tbln1kaLnMBM9jlgyV8` (Creative, Logo, headline, description, destination).
 
 ### Super Admin Analytics
-`SuperAdminDashboardView.tsx`: Executive KPIs (active properties, realtors, QR scans, buyer views, intent leads, sponsor MRR), Realtor table (listings, scans, leads, AMPI status), Properties table (acoustic, beach walk, scans, views, price USD/MXN), Sponsor pipeline, Stripe catalog + webhook status, Teable sync station, header Super Admin button.
+`SuperAdminDashboardView.tsx`: Executive KPIs, realtor/property/sponsor tables, pending verifications, reports moderation, Stripe catalog `we_1U5ZAkGe9hhLYer61iUulLAw` + webhook status, Teable sync. Hidden nav, footer Admin Portal + `Ctrl+Shift+A`, passkey gate removed — server Teable auth is authoritative.
+
+### Property & Agent Privacy Hardening (da697eb)
+Property references immutable `QRP-XXXXXXXXXX` (derived from record ID, backfilled), removed from editors, displayed on cards/pages/search. Property contacts: private `GET /api/properties/[id]/contact` (401 when signed-out, private no-store, no HTML pre-serialization). Latest = exactly 12, no pagination leak, no Sponsors/Featured text bodies. Comparison: max 3, named dock, explicit guidance, immediate sort (MXN default). Currency: MXN primary, USD/EUR/GBP preserved without conversion.
 
 ## Scaling Considerations
 

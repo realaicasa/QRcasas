@@ -17,18 +17,17 @@ QRcasas is **not** a traditional portal. It matches buyers to properties by **ho
 - **Bilingual EN/ES throughout:** Content, SEO/AEO/GEO fields, modals, dashboards
 - **PWA:** Installable, offline fallback, manifest icons
 
-## 3. Homepage Search Flow (Current)
+## 3. Homepage Search Flow (Current — Verified)
 ```
-Search icon (hidden filters) → Traditional filters (price, beds, baths, type, city/area)
-Latest button → Last 12 properties (thumbnail grid, latest first)
-Below Latest → Horizontal scrolling Sponsors (own search) → Horizontal scrolling Featured Properties (own search)
-Then → Interactive Map → Marketplace notice (shield) → Advertise section (Become a Sponsor + Add Property)
+Default (no mode): Latest 12 compact thumbnails (visibly selected) — no filter grid, no pagination beyond 12 → Featured Properties rail (image-first, own search) → Map (separate section) → Sponsors rail (image-first, own search)
+Search mode: Reveals conventional filters + paginated results as compact thumbnails (not large cards). Sponsors + Featured rails remain independently searchable & scrollable.
+Latest mode: Exactly newest 12, no pagination, no city/area filters leaking.
 ```
-Sponsors & Featured rails: 8s auto-advance, pause on hover/focus, arrow batch controls, compact search above each rail. Sponsor requires Billing_Status=Active && Approved.
+Sponsors & Featured rails: 8s auto-advance, pause on hover/focus, arrow batch controls, compact search above each rail. Sponsor requires Billing_Status=Active && Approved. Latest defaults to selected without `?mode=latest`.
 
 ## 4. Property & Agent Model
-- **Properties:** 1 free image, up to 10 with 200 MXN upgrade (first = featured). Each has page `/properties/{slug}?source=qr`, QR (1024px PNG), uneditable reference (e.g., QRP-XXXX). Includes bilingual SEO/AEO/GEO fields, Lifestyle DNA sliders (1-10), Building/Property/Living Experience layers.
-- **Agents:** Profile = mini-site (photo/logo, bio, specialty, portfolio, active count, social). Page `/directory/{agentId}` also shareable as `/realtors/{slug}?source=qr&contact=1`. QR, uneditable Agent Reference (QRA-XXXXXXXXXX / QRC-XXXXXX), specialist vocation, tagline. Contact info HIDDEN until contact modal opened (anti-scrape, counts opens). Trains AI chatbot (Phase 2, no hallucination).
+- **Properties:** 1 free image, up to 10 with 200 MXN upgrade (first = featured). Each has page `/properties/{slug}?source=qr`, QR (1024px PNG), **immutable deterministic reference `QRP-` + last 10 chars of record ID** (backfilled: QRP-4UQUXUWALZ, QRP-ZWVLZQWDEA, removed from editable fields). Includes bilingual SEO fields (AEO/GEO as separate factual phase), Lifestyle DNA sliders 1-10. **Contacts (email/phone/WhatsApp/brochure/booking) never serialized to page — private no-store API on modal open, 401 when signed-out, analytics only on open.**
+- **Agents:** Profile = mini-site (photo/logo, bio, specialty, portfolio, active count, social). Page `/directory/{agentId}` also shareable as `/realtors/{slug}?source=qr&contact=1`. QR, **immutable deterministic reference `QRA-XXXXXXXXXX` (QRC-XXXXXX legacy)** auto-generated, specialist vocation, tagline. Contact info HIDDEN until modal. Formal types: **Agent, Agency, Landlord** (Landlord added in 4263bbc). Trains future grounded chatbot (Phase 2, approved-data only).
 - **Living Experience section on property page:** Around You (beach, walkability, community, street), At The Building (scale, mix, elevator, pool), In Your Home (outlook, balcony privacy, AC, acoustic), Verified Acoustic Reality Check, Accolades (badges from data), Strengths/Compromises.
 - **Accolades:** Computed from data: Car-Free Friendly, Beach Access, Gated Community, etc.
 
@@ -68,8 +67,8 @@ Hidden from public nav, discreet footer "Admin Portal" button + `Ctrl+Shift+A` /
 ## 12. Footer Modals — 100% Bilingual
 All footer modals fully localized EN/ES via internal `t` (no mixed blocks): User Manual (5 tabs: Buyers/Agents/Landlords/Sponsors/QR Passport), Legal Compliance (Terms, ARCO, NOM-247 PROFECO, Realtor Code), Platform Guide (Living DNA, Fideicomiso 50-yr), Disclaimer, Install App (iOS Safari / Android Chrome / Desktop PWA).
 
-## 13. AI Living Advisor Chatbot (Latest)
-Concise 1-3 sentence responses, never dumps catalogs. Auto-detects user language (EN/ES/PL/RU/FR/DE/IT/PT…) + header EN|ES toggle + reset button. Strictly restricted to verified inventory, agents, Mexican coastal facts (Fideicomiso, closing costs, Living DNA). Off-topic politely declined + redirected. NEVER leaks raw phone/WhatsApp/email — instead shows inline lead dispatch card (Name, WhatsApp, Email, Move-in horizon, question) → instant Kanban CRM + notification bell + analytics. Uses Gemini 2.5 Flash when configured, deterministic fallback otherwise.
+## 13. AI Living Advisor Chatbot — Scope Clarification (Audited)
+**Current live scope:** Realtor/widget and gated campaign advisor ONLY (requires enabled public advisor, 0 currently). **Not** marketplace-wide. Responses post-processed to ≤3 sentences, deterministic greetings/language handling (EN/ES/PL/RU/FR/DE/IT/PT), EN|ES header toggle + reset, strict domain (verified inventory only, no invented QRP, max 3 property cards with image/title/location/price/Details/Inquire), contact scrub (phone/email/WhatsApp/URLs removed after generation, no WhatsApp shortcut), structured lead dispatch to existing Property Enquiries/Contact/Opportunity/Task/Notification transaction with Move-in Horizon `fldvKwUkEy2YINxjQu9` (Immediate/1-3M/3-6M/Researching) for priority, private no-store headers, fail-closed. **Still deferred:** marketplace-wide Living Advisor, Living DNA badges, legal/financial general answers, AEO/GEO factual fields. Footer User Manual now explains advisor correctly per locale (Draft legal records show pending state, not mixed language). No hard-coded admin passkey.
 
 ## 14. Outstanding (Next)
 Stripe webhook missing `customer.subscription.updated/deleted` in dashboard (code ready), credential rotation (exposed PATs), Pro/Pro Plus Price IDs, live image tests, sponsor carousel verification, Customer Portal, verified ID → Advertiser Verifications routing, portfolio polish.
